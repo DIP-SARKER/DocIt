@@ -59,28 +59,3 @@
         </div>
     </form>
 </div>
-<script>
-    const addDocBtn = document.getElementById("addDocBtn");
-    const addDocForm = document.getElementById("addDocForm");
-    const cancelDocFormBtn = document.getElementById("cancelDocFormBtn");
-    const DocForm = document.getElementById("DocForm");
-
-    if (addDocBtn && addDocForm) {
-        // Show URL shortener form
-        addDocBtn.addEventListener("click", () => {
-            addDocForm.classList.remove("hidden");
-            addDocBtn.style.display = "none";
-
-            const titleInput = document.getElementById("docTitle");
-            if (titleInput) titleInput.focus();
-        });
-
-        // Hide URL shortener form
-        if (cancelDocFormBtn) {
-            cancelDocFormBtn.addEventListener("click", () => {
-                addDocForm.classList.add("hidden");
-                addDocBtn.style.display = "inline-flex";
-            });
-        }
-    }
-</script>

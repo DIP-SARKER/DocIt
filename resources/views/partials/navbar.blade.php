@@ -39,7 +39,7 @@
                     <div class="user-options">
                         <a href="{{ route('dashboard') }}" class="dropdown-item"
                             style="border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;">
-                            <i class="fas fa-chart-column dropdown-icon"></i>
+                            <i class="fas fa-tachometer-alt dropdown-icon"></i>
                             <span>Dashboard</span>
                         </a>
                         <a href="{{ route('tasks') }}" class="dropdown-item">

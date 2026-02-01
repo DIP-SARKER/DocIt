@@ -57,22 +57,22 @@
                     </div>
                     <div class="card-body">
                         <div class="d-flex flex-column gap-2">
-                            <a href="tasks.html#addTask" class="btn btn-outline btn-full text-left">
+                            <a href="{{ route('tasks') }}" class="btn btn-outline btn-full text-left">
                                 <i class="fas fa-tasks"></i>
                                 Add New Task
                             </a>
-                            <a href="documents.html#addDocument" class="btn btn-outline btn-full text-left">
+                            <a href="{{ route('documents') }}" class="btn btn-outline btn-full text-left">
                                 <i class="fas fa-folder-plus"></i>
                                 Add Document Link
                             </a>
-                            <a href="shortener.html" class="btn btn-outline btn-full text-left">
+                            <a href="{{ route('shortlinks') }}" class="btn btn-outline btn-full text-left">
                                 <i class="fas fa-link"></i>
                                 Shorten a URL
                             </a>
-                            <a href="documents.html" class="btn btn-outline btn-full text-left">
+                            {{-- <a href="documents.html" class="btn btn-outline btn-full text-left">
                                 <i class="fas fa-qrcode"></i>
                                 Generate QR Code
-                            </a>
+                            </a> --}}
                         </div>
                     </div>
                 </div>

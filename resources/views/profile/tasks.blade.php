@@ -3,292 +3,6 @@
 @section('title', 'DocIt - Tasks')
 
 @section('content')
-    <style>
-        /* Columns Container */
-        .columns-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: var(--space-lg);
-        }
-
-        .column {
-            border-radius: var(--radius-lg);
-            display: flex;
-            flex-direction: column;
-            max-height: 60vh;
-            overflow: hidden;
-        }
-
-        .column-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: var(--space-xs);
-            margin-bottom: var(--space-sm);
-            border-bottom: 3px solid var(--border);
-        }
-
-        .column-title {
-            display: flex;
-            align-items: center;
-            gap: var(--space-md);
-            font-size: var(--font-size-2xl);
-            font-weight: 600;
-        }
-
-        .column-title i {
-            font-size: var(--font-size-lg);
-        }
-
-        .column-title h2 {
-            margin: 0px;
-        }
-
-        .column-count {
-            background: var(--light);
-            color: var(--dark);
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-        }
-
-        .todo .column-title i {
-            color: var(--warning);
-        }
-
-        .in-progress .column-title i {
-            color: var(--primary);
-        }
-
-        .done .column-title i {
-            color: var(--accent);
-        }
-
-        .tasks-list {
-            flex: 1;
-            overflow-y: auto;
-            padding-top: var(--space-xs);
-            scrollbar-width: none;
-            /* Firefox */
-            -ms-overflow-style: none;
-        }
-
-        .tasks-list::-webkit-scrollbar {
-            width: 0;
-            height: 0;
-            display: none;
-            /* Chrome, Safari, Edge */
-        }
-
-        /* Task Card */
-        .task-card {
-            background: var(--card);
-            border-radius: var(--radius-lg);
-            padding: var(--space-md);
-            margin-bottom: var(--space-md);
-            box-shadow: var(--shadow);
-            border-left: 4px solid var(--primary-light);
-            transition: var(--transition-base);
-            cursor: move;
-            position: relative;
-        }
-
-        .task-card:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .task-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: var(--space-md);
-        }
-
-        .task-title {
-            font-weight: 600;
-            font-size: 17px;
-            margin-bottom: 8px;
-        }
-
-        .task-description {
-            color: var(--secondary-light);
-            font-size: 14px;
-            line-height: 1.5;
-            margin-bottom: 15px;
-        }
-
-        .task-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 15px;
-        }
-
-        .task-priority {
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .priority-high {
-            background: #fee2e2;
-            color: var(--danger);
-        }
-
-        .priority-medium {
-            background: #fef3c7;
-            color: #f59e0b;
-        }
-
-        .priority-low {
-            background: #d1fae5;
-            color: var(--secondary);
-        }
-
-
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--gray);
-        }
-
-        .empty-state i {
-            font-size: 40px;
-            margin-bottom: 15px;
-            opacity: 0.5;
-        }
-
-        /* Animation for new tasks */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .task-card {
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        /* Responsive Design */
-
-        @media (max-width: 1200px) {
-            .columns-container {
-                grid-template-columns: repeat(2, 1fr);
-                gap: var(--space-md);
-            }
-
-            .column {
-                max-height: 70vh;
-            }
-
-            .column-title {
-                font-size: var(--font-size-xl);
-            }
-        }
-
-        /* Tablets */
-        @media (max-width: 900px) {
-            .columns-container {
-                grid-template-columns: 1fr;
-                gap: var(--space-lg);
-            }
-
-            .column {
-                max-height: 60vh;
-            }
-
-            .task-card {
-                padding: var(--space-sm);
-            }
-
-            .task-title {
-                font-size: 16px;
-            }
-
-            .task-description {
-                font-size: 13px;
-            }
-        }
-
-        /* Mobile devices */
-        @media (max-width: 600px) {
-            body {
-                padding: var(--space-sm);
-            }
-
-            .column {
-                max-height: none;
-            }
-
-            .column-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: var(--space-sm);
-            }
-
-            .column-title {
-                font-size: var(--font-size-lg);
-                gap: var(--space-sm);
-            }
-
-            .column-count {
-                width: 26px;
-                height: 26px;
-                font-size: var(--font-size-sm);
-            }
-
-            .task-header {
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            .task-footer {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-
-            .task-actions {
-                width: 100%;
-                justify-content: flex-end;
-            }
-
-            .task-actions button {
-                width: 36px;
-                height: 36px;
-            }
-        }
-
-        /* Extra small devices */
-        @media (max-width: 400px) {
-            .task-title {
-                font-size: 15px;
-            }
-
-            .task-description {
-                font-size: 12px;
-            }
-
-            .task-priority {
-                font-size: 11px;
-                padding: 4px 10px;
-            }
-        }
-    </style>
 
     <!-- Main Content -->
     <main class="main-content">
@@ -400,5 +114,146 @@
         </div>
     </main>
 
+    <script>
+        (() => {
+            // Helpers
+            const $ = (id) => document.getElementById(id);
 
+            const addTaskBtn = $("addTaskBtn");
+            const submitTaskBtn = $("tasksubmitbtn");
+            const addTaskForm = $("addTask");
+            const closeTaskFormBtn = $("closeTaskFormBtn");
+            const taskForm = $("taskForm");
+
+            // Guard: if core elements are missing, do nothing
+            if (!addTaskBtn || !addTaskForm || !taskForm || !submitTaskBtn) return;
+
+            const showForm = (focusId = "taskTitle") => {
+                addTaskForm.classList.remove("hidden");
+                addTaskBtn.style.display = "none";
+                $(focusId)?.focus();
+            };
+
+            const hideForm = () => {
+                addTaskForm.classList.add("hidden");
+                addTaskBtn.style.display = "inline-flex";
+                resetForm();
+            };
+
+            const setMethod = (method) => {
+                // Ensure only one _method exists
+                taskForm.querySelector('input[name="_method"]')?.remove();
+
+                if (method && method.toUpperCase() !== "POST") {
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = "_method";
+                    input.value = method.toUpperCase();
+                    taskForm.appendChild(input);
+                }
+            };
+
+            const setSubmitLabel = (mode) => {
+                submitTaskBtn.innerHTML =
+                    mode === "edit" ?
+                    '<i class="fas fa-file-pen"></i> Update Task' :
+                    '<i class="fas fa-save"></i> Save this task';
+            };
+
+            function resetForm() {
+                taskForm.reset();
+                taskForm.action = "/tasks";
+                setMethod("POST");
+                setSubmitLabel("create");
+            }
+
+            // Open/close form
+            addTaskBtn.addEventListener("click", () => showForm());
+
+            closeTaskFormBtn?.addEventListener("click", (e) => {
+                e.preventDefault(); // useful if it's a <button> inside a form
+                hideForm();
+            });
+
+            let originalTaskSnapshot = null;
+
+            const getFormSnapshot = () => {
+                // trim where it makes sense, keep empty as ''
+                const title = (taskForm.querySelector('[name="title"]')?.value ?? "").trim();
+                const description = (taskForm.querySelector('[name="description"]')?.value ?? "").trim();
+                const priority = taskForm.querySelector('[name="priority"]')?.value ?? "";
+                const status = taskForm.querySelector('[name="status"]')?.value ?? "";
+                const due_date = taskForm.querySelector('[name="due_date"]')?.value ?? "";
+
+                return {
+                    title,
+                    description,
+                    priority,
+                    status,
+                    due_date
+                };
+            };
+
+            const hasChanges = () => {
+                if (!originalTaskSnapshot) return true; // not in edit mode, allow
+                const now = getFormSnapshot();
+
+                // strict compare per field
+                return Object.keys(originalTaskSnapshot).some(
+                    (key) => now[key] !== originalTaskSnapshot[key]
+                );
+            };
+
+            // ✅ attach once (outside editTask) so it works for all submits
+            taskForm.addEventListener("submit", (e) => {
+                const isEditing = taskForm.querySelector('input[name="_method"]')?.value?.toUpperCase() ===
+                    "PUT";
+
+                // only block for edit updates
+                if (isEditing && !hasChanges()) {
+                    e.preventDefault();
+
+                    // optional UX
+                    alert("No changes detected. Update not sent.");
+                    return;
+                }
+            });
+            // Expose editTask if you use inline onclick="editTask(this)"
+            window.editTask = (button) => {
+                const card = button?.closest(".task-card");
+                if (!card) return;
+
+                showForm();
+                setSubmitLabel("edit");
+
+                const {
+                    id,
+                    title = "",
+                    description = "",
+                    priority = "",
+                    status = "",
+                    due = "",
+                } = card.dataset;
+
+                const titleEl = taskForm.querySelector('[name="title"]');
+                const descEl = taskForm.querySelector('[name="description"]');
+                const prioEl = taskForm.querySelector('[name="priority"]');
+                const statusEl = taskForm.querySelector('[name="status"]');
+                const dueEl = taskForm.querySelector('[name="due_date"]');
+
+                if (titleEl) titleEl.value = title;
+                if (descEl) descEl.value = description;
+                if (prioEl) prioEl.value = priority;
+                if (statusEl) statusEl.value = status;
+                if (dueEl) dueEl.value = due;
+
+                taskForm.action = `/tasks/${id}`;
+                setMethod("PUT");
+
+                // ✅ Save original snapshot AFTER values are filled
+                originalTaskSnapshot = getFormSnapshot();
+            };
+
+        })();
+    </script>
 @endsection

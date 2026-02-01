@@ -49,7 +49,9 @@
                     @if ($links->count())
                         <div id="urlList">
                             @foreach ($links as $link)
-                                <div class="short-url-item" data-id="{{ $link->id }}">
+                                <div class="short-url-item" data-id="{{ $link->id }}" data-title="{{ $link->title }}"
+                                    data-long_url="{{ $link->long_url }}" data-alias="{{ $link->alias }}"
+                                    data-track_clicks="{{ $link->track_clicks ? 1 : 0 }}">
 
                                     <div class="short-url-info">
                                         <div class="title-action gap-2 d-flex align-center">
@@ -66,11 +68,13 @@
                                                     Expires On: <span class="expires-text"></span>
                                                 </span>
                                             @endif
+                                            @if ($link->track_clicks)
+                                                <span
+                                                    class="badge badge-accent clicks-badge {{ $link->track_clicks ? '' : 'hidden' }}">
+                                                    <span class="clicks-text">{{ $link->clicks }} </span>&nbsp;clicks
+                                                </span>
+                                            @endif
 
-                                            <span
-                                                class="badge badge-accent clicks-badge {{ $link->track_clicks ? '' : 'hidden' }}">
-                                                <span class="clicks-text">{{ $link->clicks }} </span>&nbsp;clicks
-                                            </span>
                                         </div>
 
                                         <div class="short-url-result">
@@ -87,9 +91,17 @@
                                             title="Copy short link">
                                             <i class="far fa-copy"></i>
                                         </button>
+                                        @if (now()->diffInDays($link->expires_at) < 6)
+                                            <form action="{{ route('shortlinks.expand', $link) }}" method="POST"
+                                                style="display:inline;">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="edit-btn i-btn" title="Expand 10 days expiry"
+                                                    style="color: var(--accent)"> <i class="far fa-square-plus"></i>
+                                                </button>
+                                            </form>
+                                        @endif
 
-                                        <button class="edit-btn i-btn" onclick="" title="Expand 10 days expiry"
-                                            style="color: var(--accent)"> <i class="far fa-square-plus"></i> </button>
 
                                         <button class="i-btn js-edit" style="color: var(--warning)"
                                             data-id="{{ $link->id }}" title="Edit link">
@@ -133,44 +145,168 @@
         </div>
     </main>
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
+        (() => {
+            // ========== Helpers ==========
+            const $ = (id) => document.getElementById(id);
 
-            /* ===============================
-               UI TOGGLE (FORM SHOW / HIDE)
-            =============================== */
-
-            const addUrlBtn = document.getElementById("addUrlBtn");
-            const addUrlForm = document.getElementById("addUrl");
-            const cancelUrlFormBtn = document.getElementById("cancelUrlFormBtn");
-
-            if (addUrlBtn && addUrlForm) {
-                addUrlBtn.addEventListener("click", () => {
-                    addUrlForm.classList.remove("hidden");
-                    addUrlBtn.style.display = "none";
-
-                    const titleInput = document.getElementById("linkTitle");
-                    if (titleInput) titleInput.focus();
-                });
-
-                if (cancelUrlFormBtn) {
-                    cancelUrlFormBtn.addEventListener("click", () => {
-                        addUrlForm.classList.add("hidden");
-                        addUrlBtn.style.display = "inline-flex";
-                    });
+            const setMethod = (form, method) => {
+                form.querySelector('input[name="_method"]')?.remove();
+                if (method && method.toUpperCase() !== "POST") {
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = "_method";
+                    input.value = method.toUpperCase();
+                    form.appendChild(input);
                 }
-            }
+            };
 
-            /* ===============================
-               ELEMENT REFERENCES
-            =============================== */
+            const copyText = async (text) => {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                } catch (err) {
+                    // fallback
+                    const temp = document.createElement("input");
+                    temp.value = text;
+                    document.body.appendChild(temp);
+                    temp.select();
+                    document.execCommand("copy");
+                    document.body.removeChild(temp);
+                    return true;
+                }
+            };
 
-            const form = document.getElementById("shortenerForm");
-            const linkCountEl = document.getElementById("linkCount");
-            const totalClicksEl = document.getElementById("totalClicks");
-            const emptyState = document.getElementById("emptyUrlState");
-        });
+            // ========== Copy short link (list buttons) ==========
+            document.addEventListener("click", async (e) => {
+                const btn = e.target.closest(".copy-link");
+                if (!btn) return;
+
+                const url = btn.dataset.url;
+                if (!url) return;
+
+                const ok = await copyText(url);
+                if (!ok) return;
+
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                btn.disabled = true;
+
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.disabled = false;
+                }, 1200);
+            });
+
+            // ========== Form + UI refs ==========
+            const addUrlBtn = $("addUrlBtn");
+            const addUrlFormWrap = $("addUrl");
+            const cancelUrlFormBtn = $("cancelUrlFormBtn");
+            const form = $("shortenerForm");
+
+            if (!addUrlBtn || !addUrlFormWrap || !cancelUrlFormBtn || !form) return;
+
+            const cardTitleEl = addUrlFormWrap.querySelector(".card-title");
+            const submitBtn = form.querySelector('button[type="submit"]');
+
+            const titleEl = $("linkTitle"); // name="title"
+            const longUrlEl = $("longUrl"); // name="long_url"
+            const aliasEl = $("customAlias"); // name="alias"
+            const trackClicksEl = $("trackClicks"); // name="track_clicks"
+
+            // ========== Change detection (Edit mode only) ==========
+            let originalSnapshot = null;
+
+            const getSnapshot = () => ({
+                title: (titleEl?.value ?? "").trim(),
+                long_url: (longUrlEl?.value ?? "").trim(),
+                alias: (aliasEl?.value ?? "").trim(),
+                track_clicks: trackClicksEl?.checked ? "1" : "0",
+            });
+
+            const hasChanges = () => {
+                if (!originalSnapshot) return true;
+                const now = getSnapshot();
+                return Object.keys(originalSnapshot).some((k) => now[k] !== originalSnapshot[k]);
+            };
+
+            // ========== UI State ==========
+            const showForm = () => {
+                addUrlFormWrap.classList.remove("hidden");
+                addUrlBtn.style.display = "none";
+                titleEl?.focus();
+            };
+
+            const setCreateMode = () => {
+                form.reset();
+                form.action = "{{ route('shortlinks.store') }}";
+                setMethod(form, "POST");
+                originalSnapshot = null;
+
+                if (cardTitleEl) cardTitleEl.textContent = "Shorten a URL";
+                if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-link"></i> Shorten URL';
+            };
+
+            const setEditMode = (id) => {
+                form.action = `/shortlinks/${id}`;
+                setMethod(form, "PUT");
+
+                if (cardTitleEl) cardTitleEl.textContent = "Edit Short Link";
+                if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-file-pen"></i> Update Link';
+            };
+
+            const hideForm = () => {
+                addUrlFormWrap.classList.add("hidden");
+                addUrlBtn.style.display = "inline-flex";
+                setCreateMode();
+            };
+
+            // ========== Toggle create form ==========
+            addUrlBtn.addEventListener("click", () => {
+                setCreateMode();
+                showForm();
+            });
+
+            cancelUrlFormBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                hideForm();
+            });
+
+            // ========== Edit button ==========
+            document.addEventListener("click", (e) => {
+                const editBtn = e.target.closest(".js-edit");
+                if (!editBtn) return;
+
+                const row = editBtn.closest(".short-url-item");
+                if (!row) return;
+
+                const d = row.dataset;
+
+                showForm();
+
+                if (titleEl) titleEl.value = d.title ?? "";
+                if (longUrlEl) longUrlEl.value = d.long_url ?? "";
+                if (aliasEl) aliasEl.value = d.alias ?? "";
+                if (trackClicksEl) trackClicksEl.checked = (d.track_clicks === "1");
+
+                setEditMode(d.id);
+
+                // snapshot AFTER filling
+                originalSnapshot = getSnapshot();
+            });
+
+            // ========== Block update when no changes ==========
+            form.addEventListener("submit", (e) => {
+                const method = form.querySelector('input[name="_method"]')?.value?.toUpperCase();
+                const isEditing = method === "PUT";
+
+                if (isEditing && !hasChanges()) {
+                    e.preventDefault();
+                    alert("No changes detected. Nothing to update.");
+                }
+            });
+
+        })();
     </script>
-
 
 
 @endsection

@@ -21,7 +21,7 @@
         <div class="form-group">
             <label for="customAlias" class="form-label">Custom Alias (Optional)</label>
             <div class="d-flex align-center gap-1">
-                <span class="mr-2" style="color: var(--text-muted);">docit.free.nf/</span>
+                <span class="mr-2" style="color: var(--text-muted);">{{ config('app.public_url') }}/</span>
                 <input type="text" id="customAlias" name="alias" class="form-control" placeholder="my-link">
             </div>
         </div>

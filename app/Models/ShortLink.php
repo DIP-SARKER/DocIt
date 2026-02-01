@@ -25,7 +25,7 @@ class ShortLink extends Model
     {
         static::creating(function ($link) {
             if (is_null($link->expires_at)) {
-                $link->expires_at = now()->addDays(10)->toDateString();
+                $link->expires_at = now()->addDays(15)->toDateString();
             }
         });
     }

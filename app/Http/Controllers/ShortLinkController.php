@@ -21,11 +21,20 @@ class ShortLinkController extends Controller
 
     public function store(Request $request)
     {
+
+        //     'alias' => [
+//     'required',
+//     'alpha_dash',
+//     'min:5',
+//     'max:50',
+//     Rule::notIn(['login','register','dashboard','profile','tasks','documents','shortlinks']),
+// ],
+
         // Validate input
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'long_url' => 'required|url|max:2048|unique:short_links,long_url',
-            'alias' => 'nullable|min:5|string|max:50|unique:short_links,alias',
+            'alias' => 'nullable|min:5|string|max:50|unique:short_links,alias|unique:users,name',
             'track_clicks' => 'nullable|boolean',
         ]);
 
@@ -56,7 +65,7 @@ class ShortLinkController extends Controller
 
         return redirect()
             ->back()
-            ->with('success', 'Short link created successfully! Your URL: docit.free.nf/' . $alias);
+            ->with('success', 'Short link created successfully! Your URL: ' . config('app.public_url') . '/' . $alias);
     }
 
 
@@ -68,6 +77,7 @@ class ShortLinkController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'long_url' => 'required|url|max:2048|unique:short_links,long_url,' . $shortLink->id,
+            'alias' => 'nullable|min:5|string|max:50|unique:users,name|unique:short_links,alias,' . $shortLink->id,
             'track_clicks' => 'nullable|boolean',
         ]);
 
@@ -75,6 +85,7 @@ class ShortLinkController extends Controller
         $shortLink->update([
             'title' => $validated['title'],
             'long_url' => $validated['long_url'],
+            'alias' => $validated['alias'],
             'track_clicks' => $request->has('track_clicks'),
         ]);
 
@@ -83,24 +94,42 @@ class ShortLinkController extends Controller
             ->with('success', 'Short link updated successfully!');
     }
 
-    // Redirect handler
-    public function redirect($alias)
+    public function expand(ShortLink $shortLink)
     {
-        $link = ShortLink::where('alias', $alias)->firstOrFail();
+        $this->authorize('update', $shortLink);
+
+        // Extend expiry by 10 days
+        $shortLink->expires_at = now()->addDays(10)->toDateString();
+        $shortLink->save();
+
+        return redirect()
+            ->back()
+            ->with('success', 'Link expiry extended by 10 days!');
+    }
+
+    // Redirect handler
+    public function redirect(string $alias)
+    {
+        $link = ShortLink::where('alias', $alias)->first();
+
+        if (!$link) {
+            return redirect()->route('invalid');
+        }
+        // Optional: check expiration
+        if ($link->expires_at && now()->greaterThan($link->expires_at)) {
+            return redirect()->route('expired');
+        }
 
         if ($link->track_clicks) {
             $link->increment('clicks');
         }
-
         return redirect()->away($link->long_url);
     }
 
     public function destroy(ShortLink $shortLink)
     {
         $this->authorize('delete', $shortLink);
-
         $shortLink->delete();
-
         return redirect()->back()->with('success', 'Link deleted successfully.');
     }
 }

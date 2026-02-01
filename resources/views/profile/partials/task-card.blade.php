@@ -1,4 +1,6 @@
-<div class="task-card" data-id="{{ $task->id }}">
+<div class="card task-card" data-id="{{ $task->id }}" data-title="{{ $task->title }}"
+    data-description="{{ $task->description }}" data-priority="{{ $task->priority }}" data-status="{{ $task->status }}"
+    data-due="{{ $task->due_date ? $task->due_date->format('Y-m-d') : '' }}">
     <div class="task-header">
         <div>
             <div class="task-title">{{ $task->title }}</div>
@@ -6,14 +8,22 @@
         </div>
 
         <div class="task-actions">
-            <button class="edit-btn" onclick="editTask({{ $task->id }})">
+            <button class="edit-btn" onclick="editTask(this)">
                 <i class="fas fa-edit"></i>
             </button>
-            <button class="edit-btn" style="color: var(--warning)" onclick=""
-                title="Mark as {{ $task->status === 'todo' ? 'in-progress' : ($task->status === 'inprogress' ? 'Completed' : 'Todo') }}
-">
-                <i class="fas fa-arrow-right"></i>
-            </button>
+            @if ($task->status !== 'done')
+                <form action="{{ route('tasks.nextStatus', $task) }}" method="POST" style="display:inline;">
+                    @csrf
+                    @method('PATCH')
+
+                    <button type="submit" class="edit-btn" style="color: var(--warning)"
+                        title="Mark as {{ $task->status === 'todo' ? 'In Progress' : 'Completed' }}">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </form>
+            @endif
+
+
             <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" style="display:inline;"
                 onsubmit="return confirm('Are you sure you want to delete this task?');">
                 @csrf

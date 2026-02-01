@@ -44,27 +44,38 @@ class TaskController extends Controller
             ->with('success', 'Task added successfully.');
     }
 
-    public function edit(string $id)
+    public function nextStatus(Task $task)
     {
-        //
+        $this->authorize('update', $task);
+
+        $statusOrder = ['todo', 'inprogress', 'done'];
+        $currentIndex = array_search($task->status, $statusOrder, true);
+
+        if ($currentIndex !== false && $currentIndex < count($statusOrder) - 1) {
+            $task->update(['status' => $statusOrder[$currentIndex + 1]]);
+        }
+
+        return redirect()
+            ->back()
+            ->with('success', 'Task status updated successfully.');
     }
 
     public function update(Request $request, Task $task)
     {
+
+        $this->authorize('update', $task);
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
             'priority' => 'required|in:low,medium,high',
-            'status' => 'required|in:todo,inprogress,done',
             'due_date' => 'nullable|date',
         ]);
 
         $task->update($validated);
 
-        return response()->json([
-            'message' => 'Task updated successfully',
-            'task' => $task
-        ]);
+        return redirect()
+            ->back()
+            ->with('success', 'Task updated successfully.');
     }
 
     public function destroy(Task $task)

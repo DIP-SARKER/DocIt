@@ -51,16 +51,10 @@
 </head>
 
 <body class="d-flex align-center justify-center" style="min-height: 100vh; background-color: var(--background);">
-    <div class="container" style="max-width: 600px;">
-        <!-- Back to Home -->
-        <a href="{{ route('home') }}" class="d-flex align-center gap-1 mb-3" style="color: var(--text-muted);">
-            <i class="fas fa-arrow-left"></i>
-            Back to home
-        </a>
-        <main>
-            @yield('content')
-        </main>
-    </div>
+    <main>
+        @yield('content')
+    </main>
+
     <script src="{{ asset('assets/js/script.js') }}"></script>
     @stack('scripts')
 </body>
