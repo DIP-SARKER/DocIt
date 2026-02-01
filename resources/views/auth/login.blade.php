@@ -39,8 +39,8 @@
                 <div class="form-group">
                     <div class="d-flex justify-between">
                         <label for="password" class="form-label">Password</label>
-                        <a href="{{ route('password.request') }}" style="font-size: var(--font-size-sm);">Forgot
-                            password?</a>
+                        {{-- <a href="{{ route('password.request') }}" style="font-size: var(--font-size-sm);">Forgot
+                            password?</a> --}}
                     </div>
                     <div style="position: relative;">
                         <input type="password" id="password" name="password" class="form-control"
