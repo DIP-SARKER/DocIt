@@ -38,7 +38,7 @@
             </div>
         </div>
 
-        <div class="d-flex justify-between align-center mt-3">
+        <div class="d-flex justify-between align-center mt-3 form-actions">
             <div class="form-check">
                 <input type="checkbox" name="is_locked" value="1" class="form-check-input">
                 <label class="form-check-label">Lock with password</label>

@@ -10,11 +10,24 @@ class ShortLinkController extends Controller
 {
 
     use AuthorizesRequests;
-    public function index()
+    public function index(Request $request)
     {
-        $links = ShortLink::whereBelongsTo(auth()->user())
-            ->latest()
-            ->get();
+        // $links = ShortLink::whereBelongsTo(auth()->user())
+        //     ->latest()
+        //     ->get();
+        // return view('profile.shortener', compact('links'));
+        $query = ShortLink::query()
+            ->where('user_id', auth()->id())
+            ->latest();
+
+        // Optional: server-side search by title
+        if ($request->filled('q')) {
+            $query->where('title', 'like', '%' . $request->q . '%');
+        }
+
+        // 10 per page (change as you want)
+        $links = $query->paginate(10)->withQueryString();
+
         return view('profile.shortener', compact('links'));
     }
 

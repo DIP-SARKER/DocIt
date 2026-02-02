@@ -26,7 +26,7 @@
             </div>
         </div>
 
-        <div class="d-flex justify-between align-center mt-3">
+        <div class="d-flex justify-between align-center mt-3 form-actions">
             <div class="form-check">
                 <input type="checkbox" id="trackClicks" name="track_clicks" value="1" class="form-check-input">
                 <label for="trackClicks" class="form-check-label">Track clicks on this link</label>

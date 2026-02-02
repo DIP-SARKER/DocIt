@@ -1,13 +1,13 @@
 <!-- Header -->
 <header class="navbar">
     <div class="container navbar-container">
-        <a href="{{ route('home') }}" class="navbar-brand">
+        <a href="{{ route('home') }}" class="navbar-brand not-hover">
             <i class="fas fa-file-alt"></i>
             DocIt
         </a>
         @php
             $status = Auth::check() ? 'Authenticated' : 'Guest';
-            $user_name = Auth::user()->name ?? 'Guest User';
+            $user_name = Auth::user()->name ?? 'Guest';
         @endphp
 
         <!-- User Profile with Dropdown -->

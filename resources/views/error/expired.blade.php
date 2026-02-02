@@ -5,7 +5,7 @@
 @section('content')
     <div class="card text-center error-page">
         <div class="card-body">
-            <div class="error-icon pulse">
+            <div class="error-icon pulse rotation">
                 <i class="fas fa-hourglass-end fa-4x text-accent"></i>
             </div>
 

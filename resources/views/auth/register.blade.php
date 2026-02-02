@@ -11,12 +11,11 @@
         </a>
         <!-- Register Card -->
         <div class="card">
-            <div class="text-center mb-3">
-                <div class="navbar-brand"
-                    style="font-size: var(--font-size-2xl); justify-content: center; margin-bottom: var(--space-sm);">
+            <div class="mb-3  d-flex flex-column align-center">
+                <a href="{{ route('home') }}" class="navbar-brand not-hover">
                     <i class="fas fa-file-alt"></i>
                     DocIt
-                </div>
+                </a>
                 <h2>Create your account</h2>
                 <p class="text-muted">Get started with DocIt in less than a minute</p>
             </div>
