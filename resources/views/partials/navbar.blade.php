@@ -7,14 +7,14 @@
         </a>
         @php
             $status = Auth::check() ? 'Authenticated' : 'Guest';
-            $user_name = Auth::user()->name ?? 'Guest';
+            $user = Auth::user();
         @endphp
 
         <!-- User Profile with Dropdown -->
         <div class="navbar-user">
             <div class="nav-user">
-                <div class="avatar">{{ strtoupper(substr($user_name, 0, 2)) }}</div>
-                <span class="user-name">{{ $user_name }}</span>
+                <div class="avatar">{{ strtoupper(substr($user->name ?? 'Guest', 0, 2)) }}</div>
+                <span class="user-name">{{ $user->name ?? 'Guest' }}</span>
                 <i class="fas fa-chevron-down"></i>
             </div>
 
@@ -37,6 +37,14 @@
                 @endif
                 @if ($status == 'Authenticated')
                     <div class="user-options">
+                        @if ($user->isAdmin())
+                            <a href="{{ route('admin.dashboard') }}" class="dropdown-item"
+                                style="border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;">
+                                <i class="fas fa-user-tie dropdown-icon"></i>
+                                <span>Admin Panel</span>
+                            </a>
+                        @endif
+
                         <a href="{{ route('dashboard') }}" class="dropdown-item"
                             style="border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;">
                             <i class="fas fa-tachometer-alt dropdown-icon"></i>

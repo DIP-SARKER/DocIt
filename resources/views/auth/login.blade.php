@@ -56,12 +56,12 @@
                 </div>
 
                 <div class="form-check">
-                    <input type="checkbox" id="remember" class="form-check-input">
+                    <input type="checkbox" id="remember" name="remember" class="form-check-input" value="1">
                     <label for="remember" class="form-check-label">Remember me on this device</label>
                 </div>
 
                 <!-- Error Message Placeholder -->
-                @if ($errors->any())
+                @if ($errors->any() && !str_contains($errors->first('email'), 'banned'))
                     <div id="loginError" class="alert alert-danger align-center d-flex gap-2 mt-4">
                         <i class="fas fa-exclamation-circle"></i>
                         <div id="errorText">
@@ -70,6 +70,15 @@
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
+                        </div>
+                    </div>
+                @endif
+                @if ($errors->has('email') && str_contains($errors->first('email'), 'banned'))
+                    <div class="alert alert-warning align-center d-flex gap-2 mt-4">
+                        <i class="fas fa-ban"></i>
+                        <div>
+                            Your account has been banned. Please <a href="mailto:contact.dipsdevs@gmail.com">contact
+                                support</a>.
                         </div>
                     </div>
                 @endif

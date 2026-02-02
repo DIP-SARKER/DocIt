@@ -59,24 +59,26 @@
             <div class="columns-container">
 
                 <!-- ================= TO DO ================= -->
-                <div class="column todo">
-                    <div class="column-header">
-                        <div class="column-title">
-                            <i class="fas fa-clipboard-list"></i>
-                            <h2>To Do</h2>
-                        </div>
-                        <div class="column-count">{{ $todoTasks->total() }}</div>
-                    </div>
-
-                    <div class="tasks-list">
-                        @forelse ($todoTasks as $task)
-                            @include('profile.partials.task-card', ['task' => $task])
-                        @empty
-                            <div class="empty-state">
-                                <i class="fas fa-clipboard"></i>
-                                <p>No tasks yet</p>
+                <div>
+                    <div class="column todo">
+                        <div class="column-header">
+                            <div class="column-title">
+                                <i class="fas fa-clipboard-list"></i>
+                                <h2>To Do</h2>
                             </div>
-                        @endforelse
+                            <div class="column-count">{{ $todoTasks->total() }}</div>
+                        </div>
+
+                        <div class="tasks-list">
+                            @forelse ($todoTasks as $task)
+                                @include('profile.partials.task-card', ['task' => $task])
+                            @empty
+                                <div class="empty-state">
+                                    <i class="fas fa-clipboard"></i>
+                                    <p>No tasks yet</p>
+                                </div>
+                            @endforelse
+                        </div>
                     </div>
 
                     @if ($todoTasks->hasPages())
@@ -88,24 +90,26 @@
 
 
                 <!-- ================= IN PROGRESS ================= -->
-                <div class="column in-progress">
-                    <div class="column-header">
-                        <div class="column-title">
-                            <i class="fas fa-spinner"></i>
-                            <h2>In Progress</h2>
-                        </div>
-                        <div class="column-count">{{ $inProgressTasks->total() }}</div>
-                    </div>
-
-                    <div class="tasks-list">
-                        @forelse ($inProgressTasks as $task)
-                            @include('profile.partials.task-card', ['task' => $task])
-                        @empty
-                            <div class="empty-state">
-                                <i class="fas fa-cogs"></i>
-                                <p>No tasks in progress</p>
+                <div>
+                    <div class="column in-progress">
+                        <div class="column-header">
+                            <div class="column-title">
+                                <i class="fas fa-spinner"></i>
+                                <h2>In Progress</h2>
                             </div>
-                        @endforelse
+                            <div class="column-count">{{ $inProgressTasks->total() }}</div>
+                        </div>
+
+                        <div class="tasks-list">
+                            @forelse ($inProgressTasks as $task)
+                                @include('profile.partials.task-card', ['task' => $task])
+                            @empty
+                                <div class="empty-state">
+                                    <i class="fas fa-cogs"></i>
+                                    <p>No tasks in progress</p>
+                                </div>
+                            @endforelse
+                        </div>
                     </div>
 
                     @if ($inProgressTasks->hasPages())
@@ -117,24 +121,26 @@
 
 
                 <!-- ================= DONE ================= -->
-                <div class="column done">
-                    <div class="column-header">
-                        <div class="column-title">
-                            <i class="fas fa-check-circle"></i>
-                            <h2>Done</h2>
-                        </div>
-                        <div class="column-count">{{ $doneTasks->total() }}</div>
-                    </div>
-
-                    <div class="tasks-list">
-                        @forelse ($doneTasks as $task)
-                            @include('profile.partials.task-card', ['task' => $task])
-                        @empty
-                            <div class="empty-state">
-                                <i class="fas fa-flag-checkered"></i>
-                                <p>No completed tasks</p>
+                <div>
+                    <div class="column done">
+                        <div class="column-header">
+                            <div class="column-title">
+                                <i class="fas fa-check-circle"></i>
+                                <h2>Done</h2>
                             </div>
-                        @endforelse
+                            <div class="column-count">{{ $doneTasks->total() }}</div>
+                        </div>
+
+                        <div class="tasks-list">
+                            @forelse ($doneTasks as $task)
+                                @include('profile.partials.task-card', ['task' => $task])
+                            @empty
+                                <div class="empty-state">
+                                    <i class="fas fa-flag-checkered"></i>
+                                    <p>No completed tasks</p>
+                                </div>
+                            @endforelse
+                        </div>
                     </div>
 
                     @if ($doneTasks->hasPages())

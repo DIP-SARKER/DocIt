@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DashBoardController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\DocumentController;
@@ -28,8 +29,16 @@ Route::get('/settings', function () {
 
 Route::middleware('auth')->group(function () {
 
+    Route::get('/admin/dashboard', [AdminController::class, 'showAdmin'])->name('admin.dashboard');
+
+    Route::put('/admin/users/{user}', [AdminController::class, 'update'])
+        ->name('admin.users.update');
+
+    Route::delete('/admin/users/{user}/data', [AdminController::class, 'deleteUserData'])
+        ->name('admin.data.delete');
+
+
     Route::get('/dashboard', [DashBoardController::class, 'index'])->name('dashboard');
-    Route::get('/admin/dashboard', [DashBoardController::class, 'index'])->name('admin.dashboard');
     Route::get('/mods/dashboard', [DashBoardController::class, 'index'])->name('mods.dashboard');
 
     Route::get('/tasks', [TaskController::class, 'index'])->name('tasks');
