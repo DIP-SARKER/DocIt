@@ -28,17 +28,19 @@
                     <label for="fullName" class="form-label">UserName</label>
                     <input type="text" name="name" id="fullName" class="form-control"
                         placeholder="lionel_andrés_messi" required>
-                    <p class="text-muted" style="font-size: var(--font-size-sm); margin-top: var(--space-xs);">
+                    <p class="text-muted" id="hintName"
+                        style="font-size: var(--font-size-sm); margin-top: var(--space-xs);">
                         <i class="fas fa-info-circle"></i>
-                        Select a unique username. It will serve as your document page subdomain.
+                        Select a unique username.
                     </p>
                 </div>
 
                 <div class="form-group">
                     <label for="email" class="form-label">Email Address</label>
                     <input type="email" name="email" id="email" class="form-control" placeholder="you@example.com"
-                        required>
-                    <p class="text-muted" style="font-size: var(--font-size-sm); margin-top: var(--space-xs);">
+                        autocomplete="email" required>
+                    <p class="text-muted" id="hintEmail"
+                        style="font-size: var(--font-size-sm); margin-top: var(--space-xs);">
                         <i class="fas fa-info-circle"></i>
                         Email must be unique and not already registered.
                     </p>
@@ -48,13 +50,14 @@
                     <label for="password" class="form-label">Password</label>
                     <div style="position: relative;">
                         <input type="password" id="password" name="password" class="form-control"
-                            placeholder="Create a strong password" required>
+                            placeholder="Create a strong password" autocomplete="new-password" required>
                         <button type="button" id="togglePassword" class="i-btn"
                             style="position: absolute; right: 0; top: 0; height: 100%; color: var(--text-muted); border: none; background: transparent; margin-right: 15px; cursor: pointer;">
                             <i class="far fa-eye"></i>
                         </button>
                     </div>
-                    <p class="text-muted" style="font-size: var(--font-size-sm); margin-top: var(--space-xs);">
+                    <p class="text-muted" id="hintPass"
+                        style="font-size: var(--font-size-sm); margin-top: var(--space-xs);">
                         <i class="fas fa-info-circle"></i>
                         Min. 8 chars, include upper/lowercase, numbers, symbols.
                     </p>
@@ -65,13 +68,14 @@
                     <div style="position: relative;">
                         <!-- ✅ FIXED NAME (NO SPACES, NO LINE BREAK) -->
                         <input type="password" name="password_confirmation" id="confirmPassword" class="form-control"
-                            placeholder="Confirm your password" required>
+                            placeholder="Confirm your password" autocomplete="new-password" required>
                         <button type="button" id="toggleCP" class="i-btn"
                             style="position: absolute; right: 0; top: 0; height: 100%; color: var(--text-muted); border: none; background: transparent; margin-right: 15px; cursor: pointer;">
                             <i class="far fa-eye"></i>
                         </button>
                     </div>
-                    <p class="text-muted" style="font-size: var(--font-size-sm); margin-top: var(--space-xs);">
+                    <p class="text-muted" id="hintCP"
+                        style="font-size: var(--font-size-sm); margin-top: var(--space-xs);">
                         <i class="fas fa-info-circle"></i>
                         Ensure this matches your chosen password.
                     </p>

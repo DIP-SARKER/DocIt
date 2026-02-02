@@ -28,7 +28,8 @@
                     <div class="form-group">
                         <label for="searchLink" class="form-label">Search Link</label>
                         <div style="position: relative;">
-                            <input type="text" id="searchLink" class="form-control" placeholder="Search by title">
+                            <input type="text" id="searchLink" class="form-control" placeholder="Search by title"
+                                value="{{ request('q') }}">
                             <i class="fas fa-search"
                                 style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
                         </div>
@@ -39,7 +40,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-between align-center">
                     <h3 class="card-title">Active Shortened URLs</h3>
-                    <span class="badge" id="linkCount">{{ $links->count() }} Links</span>
+                    <span class="badge" id="linkCount">{{ $links->total() }} Links</span>
 
                 </div>
 
@@ -54,7 +55,8 @@
                                     data-track_clicks="{{ $link->track_clicks ? 1 : 0 }}">
 
                                     <div class="short-url-info">
-                                        <div class="title-action gap-2 d-flex align-center">
+                                        <div class="title-action gap-2 d-flex align-center"
+                                            style="flex-wrap: wrap; row-gap: var(--space-xs);">
                                             <h4 class="link-title">{{ $link->title }}</h4>
 
                                             @if ($link->expires_at)
@@ -86,10 +88,15 @@
                                         </div>
                                     </div>
 
-                                    <div class="task-actions">
+                                    <div class="task-actions url-actions">
                                         <button class="edit-btn i-btn copy-link" data-url="{{ url($link->alias) }}"
                                             title="Copy short link">
                                             <i class="far fa-copy"></i>
+                                        </button>
+
+                                        <button class="i-btn js-edit" style="color: var(--warning)"
+                                            data-id="{{ $link->id }}" title="Edit link">
+                                            <i class="fas fa-edit"></i>
                                         </button>
                                         @if (now()->diffInDays($link->expires_at) < 6)
                                             <form action="{{ route('shortlinks.expand', $link) }}" method="POST"
@@ -101,13 +108,6 @@
                                                 </button>
                                             </form>
                                         @endif
-
-
-                                        <button class="i-btn js-edit" style="color: var(--warning)"
-                                            data-id="{{ $link->id }}" title="Edit link">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-
                                         <form method="POST" action="{{ route('shortlinks.destroy', $link->id) }}"
                                             onsubmit="return confirm('Delete this short link?')">
                                             @csrf
@@ -137,15 +137,98 @@
 
                 <div class="card-footer d-flex justify-between">
                     <div class="text-muted">
-                        Total clicks: <strong id="totalClicks">{{ $links->sum('clicks') }}</strong>
+                        Total clicks: <strong id="totalClicks">{{ $totalClicks }}</strong>
 
                     </div>
+                    @if ($links->hasPages())
+                        <div>
+                            {{ $links->links() }}
+                        </div>
+                    @endif
+
                 </div>
             </div>
         </div>
     </main>
     <script>
         (() => {
+            //userfriendly form
+            document.addEventListener("DOMContentLoaded", () => {
+                const urlInput = document.getElementById("longUrl");
+                const lhint = document.getElementById("urlHint");
+
+                if (!urlInput || !lhint) return;
+                urlInput.addEventListener("input", function() {
+                    const value = this.value.trim();
+
+                    // Reset to default
+                    lhint.innerHTML =
+                        `<i class="fas fa-info-circle"></i> This URL must be unique and properly formatted.`;
+                    lhint.style.color = "var(--text-muted)";
+
+                    // If user typed something but URL is invalid
+                    if (value.length > 0 && !this.checkValidity()) {
+                        lhint.innerHTML =
+                            `<i class="fas fa-info-circle"></i> Please enter a valid URL (include http:// or https://).`;
+                        lhint.style.color = "var(--danger)";
+                        return;
+                    }
+
+                    // Length warning (soft)
+                    if (value.length > 1900 && value.length <= 2048) {
+                        lhint.innerHTML =
+                            `<i class="fas fa-info-circle"></i> Approaching maximum URL length.`;
+                        lhint.style.color = "var(--warning)";
+                    }
+
+                    // Hard limit hint
+                    if (value.length > 2048) {
+                        lhint.innerHTML =
+                            `<i class="fas fa-info-circle"></i> URL exceeds the maximum allowed length (2048).`;
+                        lhint.style.color = "var(--danger)";
+                    }
+                });
+
+
+
+
+                const aliasInput = document.getElementById("customAlias");
+                const hint = document.getElementById("aliasHint");
+
+                if (!aliasInput || !hint) return;
+
+                aliasInput.addEventListener("input", function() {
+                    // Restrict characters
+                    this.value = this.value.replace(/[^a-zA-Z0-9_-]/g, "");
+
+                    // Enforce max length
+                    if (this.value.length > 50) {
+                        this.value = this.value.slice(0, 50);
+                    }
+
+                    // Gentle minimum length hint (only if user typed something)
+                    if (this.value.length > 0 && this.value.length < 5) {
+                        hint.innerHTML =
+                            `<i class="fas fa-info-circle"></i> Minimum 5 characters required.`;
+                        hint.style.color = "var(--danger)";
+                    } else {
+                        hint.innerHTML =
+                            `<i class="fas fa-info-circle"></i> Custom name using letters, numbers, dashes, or underscores only.`;
+                        hint.style.color = "var(--text-muted)";
+                    }
+                });
+
+            });
+            // ========== Searching ==========
+            document.getElementById('searchLink')?.addEventListener('keydown', (e) => {
+                if (e.key !== 'Enter') return;
+                const q = e.target.value.trim();
+                const url = new URL(window.location.href);
+                if (q) url.searchParams.set('q', q);
+                else url.searchParams.delete('q');
+                url.searchParams.delete('page'); // reset pagination when searching
+                window.location.href = url.toString();
+            });
             // ========== Helpers ==========
             const $ = (id) => document.getElementById(id);
 

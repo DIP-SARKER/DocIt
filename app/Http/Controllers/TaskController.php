@@ -11,12 +11,44 @@ class TaskController extends Controller
 {
     use AuthorizesRequests;
 
-    public function index()
+    public function index(Request $request)
     {
-        $tasks = Task::whereBelongsTo(auth()->user())
-            ->latest()
-            ->get();
-        return view('profile.tasks', compact('tasks'));
+        $baseQuery = Task::where('user_id', auth()->id())
+            ->latest();
+
+        // Optional: search
+        if ($request->filled('q')) {
+            $q = trim($request->q);
+            $baseQuery->where(function ($query) use ($q) {
+                $query->where('title', 'like', "%{$q}%")
+                    ->orWhere('description', 'like', "%{$q}%")
+                    ->orWhere('priority', 'like', "%{$q}%");
+            });
+        }
+
+        // 🔹 Three independent paginators
+        $todoTasks = (clone $baseQuery)
+            ->where('status', 'todo')
+            ->paginate(5, ['*'], 'todo_page');
+
+        $inProgressTasks = (clone $baseQuery)
+            ->where('status', 'inprogress')
+            ->paginate(5, ['*'], 'progress_page');
+
+        $doneTasks = (clone $baseQuery)
+            ->where('status', 'done')
+            ->paginate(5, ['*'], 'done_page');
+
+        $todoTasks->withQueryString();
+        $inProgressTasks->withQueryString();
+        $doneTasks->withQueryString();
+
+
+        return view('profile.tasks', compact(
+            'todoTasks',
+            'inProgressTasks',
+            'doneTasks'
+        ));
     }
     public function store(Request $request)
     {

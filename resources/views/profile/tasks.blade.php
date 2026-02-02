@@ -24,19 +24,33 @@
             @include('profile.partials.task-form')
 
             <!-- Search & Filter -->
-            <div class="card mb-4">
+            <!-- Search -->
+            <form method="GET" action="{{ route('tasks') }}" class="card mb-4">
                 <div class="grid gap-3">
                     <div class="form-group">
-                        <label for="searchDocuments" class="form-label">Search Task</label>
+                        <label for="searchTask" class="form-label">Search Task</label>
+
                         <div style="position: relative;">
-                            <input type="text" id="searchTask" class="form-control"
-                                placeholder="Search by title, priority, or description">
+                            <input type="text" id="searchTask" name="q" class="form-control"
+                                placeholder="Search by title, priority, or description" value="{{ request('q') }}">
+
                             <i class="fas fa-search"
-                                style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                                style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);">
+                            </i>
                         </div>
                     </div>
                 </div>
-            </div>
+
+                <div class="d-flex gap-2 mt-3" style="justify-content: end">
+                    <a class="btn btn-outline" href="{{ route('tasks') }}">
+                        Reset
+                    </a>
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </form>
+
 
 
 
@@ -45,17 +59,17 @@
             <div class="columns-container">
 
                 <!-- ================= TO DO ================= -->
-                <div class="column todo" data-status="todo">
+                <div class="column todo">
                     <div class="column-header">
                         <div class="column-title">
                             <i class="fas fa-clipboard-list"></i>
                             <h2>To Do</h2>
                         </div>
-                        <div class="column-count">{{ $tasks->where('status', 'todo')->count() }}</div>
+                        <div class="column-count">{{ $todoTasks->total() }}</div>
                     </div>
 
                     <div class="tasks-list">
-                        @forelse ($tasks->where('status','todo') as $task)
+                        @forelse ($todoTasks as $task)
                             @include('profile.partials.task-card', ['task' => $task])
                         @empty
                             <div class="empty-state">
@@ -64,20 +78,27 @@
                             </div>
                         @endforelse
                     </div>
+
+                    @if ($todoTasks->hasPages())
+                        <div class="pagination-wrapper mt-2">
+                            {{ $todoTasks->links() }}
+                        </div>
+                    @endif
                 </div>
 
+
                 <!-- ================= IN PROGRESS ================= -->
-                <div class="column in-progress" data-status="inprogress">
+                <div class="column in-progress">
                     <div class="column-header">
                         <div class="column-title">
                             <i class="fas fa-spinner"></i>
                             <h2>In Progress</h2>
                         </div>
-                        <div class="column-count">{{ $tasks->where('status', 'inprogress')->count() }}</div>
+                        <div class="column-count">{{ $inProgressTasks->total() }}</div>
                     </div>
 
                     <div class="tasks-list">
-                        @forelse ($tasks->where('status','inprogress') as $task)
+                        @forelse ($inProgressTasks as $task)
                             @include('profile.partials.task-card', ['task' => $task])
                         @empty
                             <div class="empty-state">
@@ -86,20 +107,27 @@
                             </div>
                         @endforelse
                     </div>
+
+                    @if ($inProgressTasks->hasPages())
+                        <div class="pagination-wrapper mt-2">
+                            {{ $inProgressTasks->links() }}
+                        </div>
+                    @endif
                 </div>
 
+
                 <!-- ================= DONE ================= -->
-                <div class="column done" data-status="done">
+                <div class="column done">
                     <div class="column-header">
                         <div class="column-title">
                             <i class="fas fa-check-circle"></i>
                             <h2>Done</h2>
                         </div>
-                        <div class="column-count">{{ $tasks->where('status', 'done')->count() }}</div>
+                        <div class="column-count">{{ $doneTasks->total() }}</div>
                     </div>
 
                     <div class="tasks-list">
-                        @forelse ($tasks->where('status','done') as $task)
+                        @forelse ($doneTasks as $task)
                             @include('profile.partials.task-card', ['task' => $task])
                         @empty
                             <div class="empty-state">
@@ -108,7 +136,14 @@
                             </div>
                         @endforelse
                     </div>
+
+                    @if ($doneTasks->hasPages())
+                        <div class="pagination-wrapper mt-2">
+                            {{ $doneTasks->links() }}
+                        </div>
+                    @endif
                 </div>
+
 
             </div>
         </div>

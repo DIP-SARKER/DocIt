@@ -16,14 +16,25 @@
             <label for="longUrl" class="form-label">Long URL</label>
             <input type="url" id="longUrl" name="long_url" class="form-control"
                 placeholder="https://www.example.com/..." required>
+            <p id="urlHint" class="text-muted" style="font-size: var(--font-size-sm); margin-top: var(--space-xs);">
+                <i class="fas fa-info-circle"></i>
+                This URL must be unique and properly formatted. [max:2048]
+            </p>
         </div>
 
         <div class="form-group">
             <label for="customAlias" class="form-label">Custom Alias (Optional)</label>
             <div class="d-flex align-center gap-1">
                 <span class="mr-2" style="color: var(--text-muted);">{{ config('app.public_url') }}/</span>
-                <input type="text" id="customAlias" name="alias" class="form-control" placeholder="my-link">
+                <input type="text" id="customAlias" name="alias" class="form-control" placeholder="my-link"
+                    minlength="5" maxlength="50" autocomplete="off" />
+
             </div>
+            <p id="aliasHint" class="text-muted" style="font-size: var(--font-size-sm); margin-top: var(--space-xs);">
+                <i class="fas fa-info-circle"></i>
+                Custom name using letters, numbers, dashes, or underscores only.
+            </p>
+
         </div>
 
         <div class="d-flex justify-between align-center mt-3 form-actions">

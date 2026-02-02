@@ -5,6 +5,7 @@ use App\Models\ShortLink;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class ShortLinkController extends Controller
 {
@@ -12,10 +13,6 @@ class ShortLinkController extends Controller
     use AuthorizesRequests;
     public function index(Request $request)
     {
-        // $links = ShortLink::whereBelongsTo(auth()->user())
-        //     ->latest()
-        //     ->get();
-        // return view('profile.shortener', compact('links'));
         $query = ShortLink::query()
             ->where('user_id', auth()->id())
             ->latest();
@@ -26,47 +23,72 @@ class ShortLinkController extends Controller
         }
 
         // 10 per page (change as you want)
-        $links = $query->paginate(10)->withQueryString();
-
-        return view('profile.shortener', compact('links'));
+        $links = $query->paginate(8)->withQueryString();
+        $totalClicks = ShortLink::where('user_id', auth()->id())->sum('clicks');
+        return view('profile.shortener', compact('links', 'totalClicks'));
     }
 
 
     public function store(Request $request)
     {
-
-        //     'alias' => [
-//     'required',
-//     'alpha_dash',
-//     'min:5',
-//     'max:50',
-//     Rule::notIn(['login','register','dashboard','profile','tasks','documents','shortlinks']),
-// ],
+        $reserved = $this->reservedAliases();
 
         // Validate input
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'long_url' => 'required|url|max:2048|unique:short_links,long_url',
-            'alias' => 'nullable|min:5|string|max:50|unique:short_links,alias|unique:users,name',
-            'track_clicks' => 'nullable|boolean',
-        ]);
+        $validated = $request->validate(
+            [
+                'title' => ['required', 'string', 'max:255'],
+
+                'long_url' => [
+                    'required',
+                    'url',
+                    'max:2048',
+                    Rule::unique('short_links', 'long_url'),
+                ],
+
+                'alias' => [
+                    'nullable',
+                    'string',
+                    'min:5',
+                    'max:50',
+                    'alpha_dash',
+                    Rule::unique('short_links', 'alias'),
+                    Rule::unique('users', 'name'),
+                    Rule::notIn($reserved),
+                ],
+
+                'track_clicks' => ['nullable', 'boolean'],
+            ],
+            [
+                'alias.not_in' => 'This alias is reserved. Please choose another one.',
+            ]
+        );
 
         // Generate alias
         if (!empty($validated['alias'])) {
-            $alias = Str::slug($validated['alias']); // sanitize user input
+            $alias = Str::slug($validated['alias']);
         } else {
-            // Create slug from title
             $alias = Str::slug($validated['title']);
-
-            // Ensure unique alias
             $originalAlias = $alias;
             $counter = 1;
+
             while (ShortLink::where('alias', $alias)->exists()) {
                 $alias = $originalAlias . '-' . $counter++;
             }
         }
 
-        // Create short link
+        // Re-check after formatting
+        if (in_array($alias, $reserved, true)) {
+            return back()
+                ->withErrors(['alias' => 'This alias is reserved. Please choose another one.'])
+                ->withInput();
+        }
+
+        if (ShortLink::where('alias', $alias)->exists()) {
+            return back()
+                ->withErrors(['alias' => 'Alias already exists. Choose another.'])
+                ->withInput();
+        }
+
         ShortLink::create([
             'user_id' => auth()->id(),
             'title' => $validated['title'],
@@ -78,7 +100,10 @@ class ShortLinkController extends Controller
 
         return redirect()
             ->back()
-            ->with('success', 'Short link created successfully! Your URL: ' . config('app.public_url') . '/' . $alias);
+            ->with(
+                'success',
+                'Short link created successfully! Your URL: ' . config('app.public_url') . '/' . $alias
+            );
     }
 
 
@@ -86,19 +111,67 @@ class ShortLinkController extends Controller
     {
         $this->authorize('update', $shortLink);
 
-        // Validate input
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'long_url' => 'required|url|max:2048|unique:short_links,long_url,' . $shortLink->id,
-            'alias' => 'nullable|min:5|string|max:50|unique:users,name|unique:short_links,alias,' . $shortLink->id,
-            'track_clicks' => 'nullable|boolean',
-        ]);
+        $reserved = $this->reservedAliases();
 
-        // Update short link
+        // Validate input
+        $validated = $request->validate(
+            [
+                'title' => ['required', 'string', 'max:255'],
+
+                'long_url' => [
+                    'required',
+                    'url',
+                    'max:2048',
+                    Rule::unique('short_links', 'long_url')->ignore($shortLink->id),
+                ],
+
+                'alias' => [
+                    'nullable',
+                    'string',
+                    'min:5',
+                    'max:50',
+                    'alpha_dash',
+                    Rule::unique('short_links', 'alias')->ignore($shortLink->id),
+                    Rule::unique('users', 'name'),
+                    Rule::notIn($reserved),
+                ],
+
+                'track_clicks' => ['nullable', 'boolean'],
+            ],
+            [
+                'alias.not_in' => 'This alias is reserved. Please choose another one.',
+            ]
+        );
+
+        $alias = null;
+
+        if (!empty($validated['alias'])) {
+            $alias = Str::slug($validated['alias']);
+        }
+
+        // Re-check after slugging
+        if ($alias !== null) {
+            if (in_array($alias, $reserved, true)) {
+                return back()
+                    ->withErrors(['alias' => 'This alias is reserved. Please choose another one.'])
+                    ->withInput();
+            }
+
+            $exists = ShortLink::where('alias', $alias)
+                ->where('id', '!=', $shortLink->id)
+                ->exists();
+
+            if ($exists) {
+                return back()
+                    ->withErrors(['alias' => 'Alias already exists. Choose another.'])
+                    ->withInput();
+            }
+        }
+
         $shortLink->update([
             'title' => $validated['title'],
             'long_url' => $validated['long_url'],
-            'alias' => $validated['alias'],
+            'alias' => $alias,
             'track_clicks' => $request->has('track_clicks'),
         ]);
 
@@ -145,4 +218,36 @@ class ShortLinkController extends Controller
         $shortLink->delete();
         return redirect()->back()->with('success', 'Link deleted successfully.');
     }
+
+    private function reservedAliases(): array
+    {
+        return [
+            // auth routes
+            'register',
+            'login',
+            'logout',
+            'forgot-password',
+            'reset-password',
+            'verify-email',
+            'confirm-password',
+            'password',
+            'email',
+
+            // your pages
+            'dashboard',
+            'admin',
+            'mods',
+            'tasks',
+            'documents',
+            'shortlinks',
+            'profile',
+            'settings',
+            'terms-and-conditions',
+            'privacy-policy',
+            'link-expired',
+            'invalid-link',
+            'doc', // because /doc/{name}
+        ];
+    }
+
 }

@@ -13,8 +13,12 @@
 
         <div class="form-group">
             <label class="form-label">Document URL *</label>
-            <input type="url" name="url" class="form-control" placeholder="https://drive.google.com/file/..."
-                required>
+            <input type="url" name="url" id="longUrl" class="form-control"
+                placeholder="https://drive.google.com/file/..." required>
+            <p id="urlHint" class="text-muted" style="font-size: var(--font-size-sm); margin-top: var(--space-xs);">
+                <i class="fas fa-info-circle"></i>
+                This URL must be unique and properly formatted. [max:2048]
+            </p>
         </div>
 
         <div class="grid grid-2 gap-3">

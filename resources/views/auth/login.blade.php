@@ -32,7 +32,11 @@
                 <div class="form-group">
                     <label for="email" class="form-label">Email Address</label>
                     <input type="email" id="email" name="email" class="form-control" placeholder="you@example.com"
-                        required>
+                        autocomplete="email" required>
+                    <p class="text-muted" id="lgMailHint" style="font-size: var(--font-size-sm);">
+                        <i class="fas fa-info-circle"></i>
+                        Enter your valid email address.
+                    </p>
                 </div>
 
                 <div class="form-group">

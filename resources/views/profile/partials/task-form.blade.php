@@ -24,10 +24,18 @@
                     <option value="medium">Medium</option>
                     <option value="high">High</option>
                 </select>
+                <p class="text-muted" style="font-size: var(--font-size-sm); margin-top: var(--space-xs);">
+                    <i class="fas fa-info-circle"></i>
+                    Choose a priority level of the task.
+                </p>
             </div>
             <div class="form-group">
                 <label class="form-label">Due Date (Optional)</label>
                 <input type="date" name="due_date" class="form-control custom-date">
+                <p class="text-muted" style="font-size: var(--font-size-sm); margin-top: var(--space-xs);">
+                    <i class="fas fa-info-circle"></i>
+                    Choose a date in the future to set the task deadline.
+                </p>
             </div>
         </div>
 

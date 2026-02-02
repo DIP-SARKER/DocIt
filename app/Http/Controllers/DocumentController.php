@@ -11,29 +11,67 @@ class DocumentController extends Controller
 {
     use AuthorizesRequests;
 
-    public function index()
+    public function index(Request $request)
     {
-        $documents = Document::whereBelongsTo(auth()->user())
-            ->latest()
-            ->get();
+        $query = Document::query()
+            ->where('user_id', auth()->id())
+            ->latest();
+        // Search (title/category/description)
+        if ($request->filled('q')) {
+            $q = trim($request->q);
+            $query->where(function ($sub) use ($q) {
+                $sub->where('title', 'like', "%{$q}%")
+                    ->orWhere('category', 'like', "%{$q}%")
+                    ->orWhere('description', 'like', "%{$q}%");
+            });
+        }
+
+        // Category filter
+        if ($request->filled('category') && $request->category !== 'all') {
+            $query->where('category', $request->category);
+        }
+
+        // Paginate
+        $documents = $query->paginate(12)->withQueryString(); // 12 fits grid-3 nicely
+
         return view('profile.documents', compact('documents'));
     }
-    public function show(string $name)
+    public function show(string $name, Request $request)
     {
         $user = User::where('name', $name)->first();
 
-        // 2️⃣ If user not found → 404 or custom page
+        // If user not found
         if (!$user) {
             return redirect()->route('invalid');
         }
 
-        // 3️⃣ Get only unlocked documents for that user
-        $documents = Document::where('user_id', $user->id)
-            ->where('is_locked', false)
-            ->latest()
-            ->get();
+        $name = $user->name;
 
-        return view('layouts.docs', compact('documents'));
+        // Base query: only unlocked docs for that user, latest first
+        $query = Document::query()
+            ->where('user_id', $user->id)
+            ->where('is_locked', false)
+            ->latest();
+
+        // Search (title/category/description)
+        if ($request->filled('q')) {
+            $q = trim($request->q);
+            $query->where(function ($sub) use ($q) {
+                $sub->where('title', 'like', "%{$q}%")
+                    ->orWhere('category', 'like', "%{$q}%")
+                    ->orWhere('description', 'like', "%{$q}%");
+            });
+        }
+
+        // Category filter
+        if ($request->filled('category') && $request->category !== 'all') {
+            $query->where('category', $request->category);
+        }
+
+        // Paginate (same style as index)
+        $documents = $query->paginate(3)->withQueryString();
+
+        return view('layouts.docs', compact('name', 'documents'));
     }
 
     public function store(Request $request)
@@ -43,7 +81,7 @@ class DocumentController extends Controller
             'title' => 'required|string|max:255',
             'url' => 'required|url|max:2048|unique:documents,url',
             'category' => 'nullable|string|max:100',
-            'description' => 'nullable|string|max:150',
+            'description' => 'nullable|string',
             'is_locked' => 'nullable|boolean',
             'is_important' => 'nullable|boolean',
         ]);
@@ -69,7 +107,7 @@ class DocumentController extends Controller
             'title' => 'required|string|max:255',
             'url' => 'required|url|max:2048|unique:documents,url,' . $document->id,
             'category' => 'nullable|string|max:100',
-            'description' => 'nullable|string|max:150',
+            'description' => 'nullable|string',
             'is_locked' => 'nullable|boolean',
             'is_important' => 'nullable|boolean',
         ]);

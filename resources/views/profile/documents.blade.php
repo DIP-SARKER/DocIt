@@ -36,28 +36,40 @@
             @include('profile.partials.document-form')
 
             <!-- Search & Filter (JS only) -->
-            <div class="card mb-4">
+            <form method="GET" action="{{ route('documents') }}" class="card mb-4">
                 <div class="grid grid-2 gap-3">
                     <div class="form-group">
                         <label class="form-label">Search Documents</label>
-                        <input type="text" id="searchDocuments" class="form-control"
-                            placeholder="Search by title, category, or description">
+                        <input type="text" id="searchDocuments" name="q" class="form-control"
+                            placeholder="Search by title, category, or description" value="{{ request('q') }}">
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Filter by Category</label>
-                        <select id="filterCategory" class="form-control">
-                            <option value="all">All Categories</option>
-                            <option value="personal">Personal</option>
-                            <option value="academic">Academic</option>
-                            <option value="work">Work</option>
-                            <option value="financial">Financial</option>
-                            <option value="travel">Travel</option>
-                            <option value="other">Other</option>
+                        <select id="filterCategory" name="category" class="form-control">
+                            <option value="all" {{ request('category', 'all') === 'all' ? 'selected' : '' }}>All
+                                Categories</option>
+                            <option value="personal" {{ request('category') === 'personal' ? 'selected' : '' }}>Personal
+                            </option>
+                            <option value="academic" {{ request('category') === 'academic' ? 'selected' : '' }}>Academic
+                            </option>
+                            <option value="work" {{ request('category') === 'work' ? 'selected' : '' }}>Work</option>
+                            <option value="financial" {{ request('category') === 'financial' ? 'selected' : '' }}>Financial
+                            </option>
+                            <option value="travel" {{ request('category') === 'travel' ? 'selected' : '' }}>Travel</option>
+                            <option value="other" {{ request('category') === 'other' ? 'selected' : '' }}>Other</option>
                         </select>
                     </div>
                 </div>
-            </div>
+                <div class="d-flex gap-2 mt-1" style="justify-content: end;">
+                    <a class="btn btn-outline" href="{{ route('documents') }}">
+                        Reset
+                    </a>
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fas fa-filter"></i> Apply
+                    </button>
+                </div>
+            </form>
 
             <!-- Document Grid -->
             @if ($documents->count())
@@ -95,8 +107,8 @@
                                 @endif
                             </div>
 
-                            <div class="document-icons mb-1" style="flex-shrink: 0;">
-                                <span class="text-muted">
+                            <div class="document-icons mb-1">
+                                <span class="text-muted doc-date">
                                     <i class="far fa-calendar"></i>
                                     {{ $document->created_at->format('M d, Y') }}
                                 </span>
@@ -130,6 +142,11 @@
                         </div>
                     @endforeach
                 </div>
+                @if ($documents->hasPages())
+                    <div class="pagination-wrapper mt-3">
+                        {{ $documents->links() }}
+                    </div>
+                @endif
             @else
                 <!-- Empty State -->
                 <div class="card text-center py-4">
@@ -144,6 +161,60 @@
 
     <script>
         (() => {
+            document.addEventListener("DOMContentLoaded", () => {
+                const urlInput = document.getElementById("longUrl");
+                const hint = document.getElementById("urlHint");
+
+                if (!urlInput || !hint) return;
+
+                urlInput.addEventListener("input", function() {
+                    const value = this.value.trim();
+
+                    // Reset to default
+                    hint.innerHTML =
+                        `<i class="fas fa-info-circle"></i> This URL must be unique and properly formatted.`;
+                    hint.style.color = "var(--text-muted)";
+
+                    // If user typed something but URL is invalid
+                    if (value.length > 0 && !this.checkValidity()) {
+                        hint.innerHTML =
+                            `<i class="fas fa-info-circle"></i> Please enter a valid URL (include http:// or https://).`;
+                        hint.style.color = "var(--danger)";
+                        return;
+                    }
+
+                    // Length warning (soft)
+                    if (value.length > 1900 && value.length <= 2048) {
+                        hint.innerHTML =
+                            `<i class="fas fa-info-circle"></i> Approaching maximum URL length.`;
+                        hint.style.color = "var(--warning)";
+                    }
+
+                    // Hard limit hint
+                    if (value.length > 2048) {
+                        hint.innerHTML =
+                            `<i class="fas fa-info-circle"></i> URL exceeds the maximum allowed length (2048).`;
+                        hint.style.color = "var(--danger)";
+                    }
+                });
+            });
+            // Auto-submit filters (optional)
+            const search = document.getElementById("searchDocuments");
+            const category = document.getElementById("filterCategory");
+
+            // Submit when category changes
+            category?.addEventListener("change", () => {
+                category.closest("form")?.submit();
+            });
+
+            // Submit when pressing Enter in search input
+            search?.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    search.closest("form")?.submit();
+                }
+            });
+            
             // ========== Copy Link ==========
             document.addEventListener("click", async (e) => {
                 const btn = e.target.closest(".copy-link");

@@ -7,13 +7,7 @@
     <main class="main-content">
         <div class="container">
 
-            <!-- Page Header -->
-            <div class="d-flex justify-between align-center flex-wrap gap-2 mb-4">
-                <div>
-                    <h1>Document Links</h1>
-                    <p class="text-muted">Store and access important document links from anywhere</p>
-                </div>
-            </div>
+            <h1>Showing {{ $name }}'s documents.</h1>
 
             <!-- Security Notice -->
             <div class="alert alert-info mb-4">
@@ -27,28 +21,40 @@
 
 
             <!-- Search & Filter (JS only) -->
-            <div class="card mb-4">
+            <form method="GET" action="{{ route('documents.public', $name) }}" class="card mb-4">
                 <div class="grid grid-2 gap-3">
                     <div class="form-group">
                         <label class="form-label">Search Documents</label>
-                        <input type="text" id="searchDocuments" class="form-control"
-                            placeholder="Search by title, category, or description">
+                        <input type="text" id="searchDocuments" name="q" class="form-control"
+                            placeholder="Search by title, category, or description" value="{{ request('q') }}">
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Filter by Category</label>
-                        <select id="filterCategory" class="form-control">
-                            <option value="all">All Categories</option>
-                            <option value="personal">Personal</option>
-                            <option value="academic">Academic</option>
-                            <option value="work">Work</option>
-                            <option value="financial">Financial</option>
-                            <option value="travel">Travel</option>
-                            <option value="other">Other</option>
+                        <select id="filterCategory" name="category" class="form-control">
+                            <option value="all" {{ request('category', 'all') === 'all' ? 'selected' : '' }}>All
+                                Categories</option>
+                            <option value="personal" {{ request('category') === 'personal' ? 'selected' : '' }}>Personal
+                            </option>
+                            <option value="academic" {{ request('category') === 'academic' ? 'selected' : '' }}>Academic
+                            </option>
+                            <option value="work" {{ request('category') === 'work' ? 'selected' : '' }}>Work</option>
+                            <option value="financial" {{ request('category') === 'financial' ? 'selected' : '' }}>Financial
+                            </option>
+                            <option value="travel" {{ request('category') === 'travel' ? 'selected' : '' }}>Travel</option>
+                            <option value="other" {{ request('category') === 'other' ? 'selected' : '' }}>Other</option>
                         </select>
                     </div>
                 </div>
-            </div>
+                <div class="d-flex gap-2 mt-1" style="justify-content: end;">
+                    <a class="btn btn-outline" href="{{ route('documents.public', $name) }}">
+                        Reset
+                    </a>
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fas fa-filter"></i> Apply
+                    </button>
+                </div>
+            </form>
 
             <!-- Document Grid -->
             @if ($documents->count())
@@ -101,6 +107,11 @@
                         </div>
                     @endforeach
                 </div>
+                @if ($documents->hasPages())
+                    <div class="pagination-wrapper mt-3">
+                        {{ $documents->links() }}
+                    </div>
+                @endif
             @else
                 <!-- Empty State -->
                 <div class="card text-center py-4">
@@ -143,6 +154,22 @@
                     document.body.removeChild(tempInput);
 
                     alert("Link copied to clipboard");
+                }
+            });
+            // Auto-submit filters (optional)
+            const search = document.getElementById("searchDocuments");
+            const category = document.getElementById("filterCategory");
+
+            // Submit when category changes
+            category?.addEventListener("change", () => {
+                category.closest("form")?.submit();
+            });
+
+            // Submit when pressing Enter in search input
+            search?.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    search.closest("form")?.submit();
                 }
             });
         })();
