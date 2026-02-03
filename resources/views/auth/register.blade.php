@@ -16,15 +16,15 @@
                     <i class="fas fa-file-alt"></i>
                     DocIt
                 </a>
-                <h2>Create your account</h2>
-                <p class="text-muted">Get started with DocIt in less than a minute</p>
+                <h2 class="text-center">Create your account</h2>
+                <p class="text-muted text-center">Get started with DocIt in less than a minute</p>
             </div>
 
             <!-- Register Form -->
-            <form id="registerForm" method="POST" action="{{ route('register') }}">
+            <form class="d-flex flex-column" id="registerForm" method="POST" action="{{ route('register') }}">
                 @csrf
 
-                <div class="form-group">
+                <div class="form-group mb-0">
                     <label for="fullName" class="form-label">UserName</label>
                     <input type="text" name="name" id="fullName" class="form-control"
                         placeholder="lionel_andrés_messi" required>
@@ -35,7 +35,7 @@
                     </p>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group mb-0">
                     <label for="email" class="form-label">Email Address</label>
                     <input type="email" name="email" id="email" class="form-control" placeholder="you@example.com"
                         autocomplete="email" required>
@@ -46,7 +46,7 @@
                     </p>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group mb-0">
                     <label for="password" class="form-label">Password</label>
                     <div style="position: relative;">
                         <input type="password" id="password" name="password" class="form-control"
@@ -63,7 +63,7 @@
                     </p>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group mb-0">
                     <label for="confirmPassword" class="form-label">Confirm Password</label>
                     <div style="position: relative;">
                         <!-- ✅ FIXED NAME (NO SPACES, NO LINE BREAK) -->
@@ -81,7 +81,7 @@
                     </p>
                 </div>
 
-                <div class="form-check">
+                <div class="form-check mb-0">
                     <!-- ✅ Added name -->
                     <input type="checkbox" name="terms" id="terms" class="form-check-input" required>
                     <label for="terms" class="form-check-label">
@@ -104,7 +104,7 @@
                 @endif
 
                 <!-- ✅ Remove disabled unless JS enables it -->
-                <button type="submit" id="registerSubmitBtn" class="btn btn-primary btn-full mt-2" disabled>
+                <button type="submit" id="registerSubmitBtn" class="btn btn-outline mt-2 form-btn" disabled>
                     <i class="fas fa-user-plus"></i>
                     Create Account
                 </button>

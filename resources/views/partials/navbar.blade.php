@@ -65,7 +65,7 @@
 
                         <div class="dropdown-divider"></div>
 
-                        <a href="{{ route('settings') }}" class="dropdown-item">
+                        <a href="{{ route('settings.edit') }}" class="dropdown-item">
                             <i class="fas fa-cog dropdown-icon"></i>
                             <span>Settings</span>
                         </a>

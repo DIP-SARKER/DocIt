@@ -127,8 +127,8 @@
             <!-- Security Reminder -->
             <div class="alert alert-warning mt-4">
                 <i class="fas fa-exclamation-triangle"></i>
-                <strong>You're using a public computer.</strong> Remember to enable auto-logout in settings and clear
-                browsing data after your session.
+                <strong>Using a shared device?</strong>
+                To keep your account safe, you’ll be logged out automatically after 10 minutes of inactivity.
             </div>
         </div>
     </main>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Artisan;
 use App\Models\User;
 
 class AdminController extends Controller
@@ -102,5 +103,64 @@ class AdminController extends Controller
         };
 
         return redirect()->back()->with('success', "Successfully deleted {$user->name}'s {$type}.");
+    }
+    public function exportAllData(Request $request)
+    {
+        abort_unless($request->user() && $request->user()->isAdmin(), 403, 'Unauthorized');
+
+        // ⚠️ Export everything. Adjust what you want included.
+        $payload = [
+            'meta' => [
+                'app' => 'DocIt',
+                'exported_at' => now()->toIso8601String(),
+            ],
+            'users' => DB::table('users')->orderBy('id')->get(),
+            'tasks' => DB::table('tasks')->orderBy('id')->get(),
+            'documents' => DB::table('documents')->orderBy('id')->get(),
+            'short_links' => DB::table('short_links')->orderBy('id')->get(), // change table name if yours differs
+        ];
+
+        $filename = 'docit-export-all-' . now()->format('Y-m-d_H-i-s') . '.json';
+
+        return response()->streamDownload(function () use ($payload) {
+            echo json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        }, $filename, [
+            'Content-Type' => 'application/json',
+        ]);
+    }
+
+    public function clearCache(Request $request)
+    {
+        abort_unless($request->user() && $request->user()->isAdmin(), 403, 'Unauthorized');
+
+        // Clears cache safely (choose what you want to clear)
+        Artisan::call('cache:clear');
+        Artisan::call('view:clear');
+        Artisan::call('route:clear');
+        Artisan::call('config:clear');
+
+        return back()->with('success', 'Cache cleared successfully.');
+    }
+
+    public function purgeAllData(Request $request)
+    {
+        abort_unless($request->user() && $request->user()->isAdmin(), 403, 'Unauthorized');
+
+        $request->validate([
+            'confirm' => 'required|in:DELETE_ALL',
+        ]);
+
+        DB::transaction(function () {
+
+            DB::table('tasks')->delete();
+            DB::table('documents')->delete();
+            DB::table('short_links')->delete();
+
+            DB::table('users')->where('role', '!=', 'admin')->delete();
+        });
+        DB::table('sessions')->truncate();
+
+
+        return back()->with('success', 'All data has been deleted successfully.');
     }
 }

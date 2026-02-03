@@ -32,6 +32,8 @@ class AuthenticatedSessionController extends Controller
                 'email' => 'Your account has been banned. Please contact support.',
             ]);
         }
+
+        $request->session()->put('remember_me', $request->boolean('remember'));
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));

@@ -3,140 +3,96 @@
 @section('title', 'DocIt - Settings')
 
 @section('content')
-
-    <!-- Main Content -->
     <main class="main-content">
         <div class="container">
-            <!-- Page Header -->
             <div class="mb-4">
                 <h1>Settings</h1>
                 <p class="text-muted">Manage your account and security preferences</p>
             </div>
 
-            <!-- Profile Section -->
+            {{-- Flash messages --}}
+            @if (session('success'))
+                <div class="card mb-3" style="border-left: 4px solid var(--accent); padding: 12px;">
+                    <strong>{{ session('success') }}</strong>
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="card mb-3" style="border-left: 4px solid var(--danger); padding: 12px;">
+                    <strong>Fix the following:</strong>
+                    <ul style="margin: 8px 0 0 18px;">
+                        @foreach ($errors->all() as $error)
+                            <li class="text-muted">{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            {{-- Profile Section --}}
             <div class="card mb-4">
                 <div class="card-header">
                     <h3 class="card-title">Profile Information</h3>
                 </div>
 
                 <div class="card-body">
+                    @php
+                        $u = auth()->user();
+                        $initials = collect(explode(' ', $u->name))
+                            ->filter()
+                            ->take(2)
+                            ->map(fn($p) => strtoupper(substr($p, 0, 1)))
+                            ->join('');
+                    @endphp
+
                     <div class="d-flex align-center gap-3 mb-4">
-                        <div class="avatar" style="width: 64px; height: 64px; font-size: var(--font-size-xl);">JD</div>
+                        <div class="avatar" style="width: 64px; height: 64px; font-size: var(--font-size-xl);">
+                            {{ $initials ?: 'U' }}
+                        </div>
                         <div>
-                            <h4>John Doe</h4>
-                            <p class="text-muted">john.doe@example.com</p>
-                            <button class="btn btn-sm btn-outline">Change Avatar</button>
+                            <h4 style="margin-bottom: 2px;">{{ $u->name }}</h4>
+                            <p class="text-muted" style="margin-bottom: 0;">{{ $u->email }}</p>
                         </div>
                     </div>
 
-                    <form id="profileForm">
+                    <form method="POST" action="{{ route('settings.profile.update') }}">
+                        @csrf
+                        @method('PUT')
+
                         <div class="grid grid-2 gap-3">
                             <div class="form-group">
                                 <label for="profileName" class="form-label">Full Name</label>
-                                <input type="text" id="profileName" class="form-control" value="John Doe" required>
+                                <input type="text" id="profileName" name="name" class="form-control"
+                                    value="{{ old('name', $u->name) }}" required>
                             </div>
 
                             <div class="form-group">
                                 <label for="profileEmail" class="form-label">Email Address</label>
-                                <input type="email" id="profileEmail" class="form-control" value="john.doe@example.com"
-                                    required>
+                                <input type="email" id="profileEmail" name="email" class="form-control"
+                                    value="{{ old('email', $u->email) }}" required>
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="profileBio" class="form-label">Bio (Optional)</label>
-                            <textarea id="profileBio" class="form-control" rows="3" placeholder="Tell us a little about yourself">Product manager who loves organizing work efficiently.</textarea>
+                        <div class="d-flex justify-between">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                Save Changes
+                            </button>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline" id="changePasswordBtn">
+                                    <i class="fas fa-key"></i>
+                                    Change Password
+                                </button>
+                                <button class="btn btn-outline" id="sessionManagerBtn">
+                                    <i class="fas fa-desktop"></i>
+                                    Manage Sessions
+                                </button>
+                            </div>
                         </div>
-
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i>
-                            Save Changes
-                        </button>
                     </form>
                 </div>
             </div>
 
-            <!-- Security Section -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3 class="card-title">Security Settings</h3>
-                </div>
-
-                <div class="card-body">
-                    <div class="alert alert-info mb-4">
-                        <i class="fas fa-info-circle"></i>
-                        <strong>Public Computer Mode:</strong> Enable these settings when using shared or public
-                        devices.
-                    </div>
-
-                    <div class="mb-4">
-                        <div class="d-flex justify-between align-center mb-3">
-                            <div>
-                                <h4>Auto Logout</h4>
-                                <p class="text-muted" style="font-size: var(--font-size-sm);">Automatically log out
-                                    after a period of inactivity</p>
-                            </div>
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="autoLogoutToggle" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-
-                        <div id="autoLogoutSettings" class="pl-4">
-                            <div class="form-group">
-                                <label for="logoutTime" class="form-label">Logout after inactivity of:</label>
-                                <select id="logoutTime" class="form-control" style="max-width: 200px;">
-                                    <option value="5">5 minutes</option>
-                                    <option value="15" selected>15 minutes</option>
-                                    <option value="30">30 minutes</option>
-                                    <option value="60">1 hour</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <div class="d-flex justify-between align-center mb-2">
-                            <div>
-                                <h4>Clear Data on Logout</h4>
-                                <p class="text-muted" style="font-size: var(--font-size-sm);">Automatically clear
-                                    browsing data when logging out from public computers</p>
-                            </div>
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="clearDataToggle">
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <div class="d-flex justify-between align-center mb-2">
-                            <div>
-                                <h4>Two-Factor Authentication</h4>
-                                <p class="text-muted" style="font-size: var(--font-size-sm);">Add an extra layer of
-                                    security to your account</p>
-                            </div>
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="twoFactorToggle">
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-outline" id="changePasswordBtn">
-                            <i class="fas fa-key"></i>
-                            Change Password
-                        </button>
-                        <button class="btn btn-outline" id="sessionManagerBtn">
-                            <i class="fas fa-desktop"></i>
-                            Manage Sessions
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Preferences Section -->
+            {{-- Preferences Section (UI only for now) --}}
             <div class="card mb-4">
                 <div class="card-header">
                     <h3 class="card-title">Preferences</h3>
@@ -145,76 +101,45 @@
                 <div class="card-body">
                     <div class="mb-4">
                         <h4 class="mb-2">Theme</h4>
-                        <p class="text-muted mb-3" style="font-size: var(--font-size-sm);">Choose your preferred
-                            interface theme</p>
+                        <p class="text-muted mb-3" style="font-size: var(--font-size-sm);">
+                            Choose your preferred interface theme
+                        </p>
 
-                        <div class="d-flex gap-3">
+                        <div class="d-flex gap-3 flex-wrap">
                             <div class="card"
-                                style="padding: var(--space-md); border: 2px solid var(--primary); cursor: pointer;">
+                                style="padding: var(--space-md); border: 2px solid var(--primary); cursor: default;">
                                 <div class="d-flex align-center gap-2">
                                     <div
                                         style="width: 20px; height: 20px; border-radius: 50%; background-color: var(--primary);">
                                     </div>
-                                    <span>Light</span>
+                                    <span>Dark</span>
                                 </div>
                                 <div class="mt-2"
-                                    style="width: 100%; height: 60px; border-radius: var(--radius-sm); background: linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 50%, #E2E8F0 100%);">
+                                    style="width: 220px; max-width: 100%; height: 60px; border-radius: var(--radius-sm);
+                                    background: linear-gradient(135deg, #1E293B 0%, #0F172A 50%, #334155 100%);">
                                 </div>
                             </div>
 
                             <div class="card"
-                                style="padding: var(--space-md); border: 1px solid var(--border); cursor: pointer; opacity: 0.5;">
+                                style="padding: var(--space-md); border: 1px solid var(--border); opacity: 0.5;">
                                 <div class="d-flex align-center gap-2">
                                     <div
                                         style="width: 20px; height: 20px; border-radius: 50%; background-color: var(--secondary);">
                                     </div>
-                                    <span>Dark</span>
+                                    <span>Light</span>
                                     <span class="badge">Coming Soon</span>
                                 </div>
                                 <div class="mt-2"
-                                    style="width: 100%; height: 60px; border-radius: var(--radius-sm); background: linear-gradient(135deg, #1E293B 0%, #0F172A 50%, #334155 100%);">
+                                    style="width: 220px; max-width: 100%; height: 60px; border-radius: var(--radius-sm);
+                                    background: linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 50%, #E2E8F0 100%);">
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <h4 class="mb-2">Default Page</h4>
-                        <p class="text-muted mb-2" style="font-size: var(--font-size-sm);">Choose which page opens
-                            when you log in</p>
-
-                        <select id="defaultPage" class="form-control" style="max-width: 300px;">
-                            <option value="dashboard">Dashboard</option>
-                            <option value="tasks">Tasks</option>
-                            <option value="documents">Documents</option>
-                            <option value="shortener">URL Shortener</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <h4 class="mb-2">Notifications</h4>
-                        <p class="text-muted mb-2" style="font-size: var(--font-size-sm);">Choose how you want to be
-                            notified</p>
-
-                        <div class="form-check">
-                            <input type="checkbox" id="notifyTasks" class="form-check-input" checked>
-                            <label for="notifyTasks" class="form-check-label">Task reminders</label>
-                        </div>
-
-                        <div class="form-check">
-                            <input type="checkbox" id="notifySecurity" class="form-check-input" checked>
-                            <label for="notifySecurity" class="form-check-label">Security alerts</label>
-                        </div>
-
-                        <div class="form-check">
-                            <input type="checkbox" id="notifyUpdates" class="form-check-input">
-                            <label for="notifyUpdates" class="form-check-label">Product updates</label>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Danger Zone -->
+            {{-- Danger Zone --}}
             <div class="card border-danger" style="border-color: var(--danger);">
                 <div class="card-header" style="border-color: var(--danger);">
                     <h3 class="card-title text-danger">Danger Zone</h3>
@@ -223,36 +148,51 @@
                 <div class="card-body">
                     <div class="mb-4">
                         <h4 class="mb-2">Export Your Data</h4>
-                        <p class="text-muted mb-3" style="font-size: var(--font-size-sm);">Download a copy of all your
-                            tasks, documents, and links</p>
-                        <button class="btn btn-outline">
+                        <p class="text-muted mb-3" style="font-size: var(--font-size-sm);">
+                            Download a copy of all your tasks, documents, and links
+                        </p>
+
+                        <a class="btn btn-outline" href="{{ route('settings.export') }}">
                             <i class="fas fa-download"></i>
                             Export All Data
-                        </button>
+                        </a>
                     </div>
 
                     <div class="mb-4">
                         <h4 class="mb-2">Delete Account</h4>
-                        <p class="text-muted mb-3" style="font-size: var(--font-size-sm);">Permanently delete your
-                            account and all data. This action cannot be undone.</p>
-                        <button class="btn btn-danger" id="deleteAccountBtn">
-                            <i class="far fa-trash-alt-alt"></i>
-                            Delete Account
-                        </button>
+                        <p class="text-muted mb-3" style="font-size: var(--font-size-sm);">
+                            Permanently delete your account and all data. This action cannot be undone.
+                        </p>
+
+                        <form method="POST" action="{{ route('settings.account.destroy') }}"
+                            onsubmit="return confirm('This will permanently delete your account. Continue?')">
+                            @csrf
+                            @method('DELETE')
+
+                            <button type="submit" class="btn btn-danger">
+                                <i class="far fa-trash-alt"></i>
+                                Delete Account
+                            </button>
+                        </form>
                     </div>
 
                     <div>
                         <h4 class="mb-2">Logout</h4>
-                        <p class="text-muted mb-3" style="font-size: var(--font-size-sm);">Sign out from all devices
+                        <p class="text-muted mb-3" style="font-size: var(--font-size-sm);">
+                            Sign out from all devices
                         </p>
-                        <button class="btn btn-primary" id="logoutBtn">
-                            <i class="fas fa-sign-out-alt"></i>
-                            Logout Everywhere
-                        </button>
+
+                        <form method="POST" action="{{ route('settings.logout.everywhere') }}"
+                            onsubmit="return confirm('Logout from all devices?')">
+                            @csrf
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Logout Everywhere
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </main>
-
 @endsection

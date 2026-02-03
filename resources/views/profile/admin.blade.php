@@ -197,9 +197,45 @@
                     {{ $users->links() }}
                 </div>
             @endif
+            <div class="card mt-4 d-flex justify-between" style="border-color: var(--danger)">
+                <a class="btn btn-outline" href="{{ route('admin.tools.export') }}">
+                    <i class="fas fa-download"></i>
+                    Export All Data
+                </a>
+
+                <form method="POST" action="{{ route('admin.tools.clearCache') }}">
+                    @csrf
+                    <button type="submit" class="btn btn-primary"
+                        onclick="return confirm('Clear application cache now?')">
+                        <i class="fas fa-broom"></i>
+                        Clear cache
+                    </button>
+                </form>
+
+                <form style="diaplaylex
+                " method="POST" action="{{ route('admin.tools.purge') }}"
+                    onsubmit="return confirm('This will permanently delete all data of DocIt. Continue?')">
+                    @csrf
+                    @method('DELETE')
+
+                    <div class="form-group">
+                        <input type="text" name="confirm" value="" required>
+                        <p class="text-muted" id="lgMailHint" style="font-size: var(--font-size-sm);">
+                            <i class="fas fa-info-circle"></i>
+                            Type "DELETE_ALL" to proceed.
+                        </p>
+                    </div>
+
+
+                    <button type="submit" class="btn btn-danger">
+                        <i class="far fa-trash-alt"></i>
+                        Delete all data
+                    </button>
+                </form>
+            </div>
+
         </div>
     </main>
-
     <script>
         // Optional: auto-submit search on Enter is already handled by form submit.
         // You can add AJAX actions later (role change, block toggle, delete-all) using these data-user-id attributes.

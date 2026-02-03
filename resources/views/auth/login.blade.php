@@ -16,20 +16,20 @@
                     <i class="fas fa-file-alt"></i>
                     DocIt
                 </a>
-                <h2>Welcome back</h2>
-                <p class="text-muted">Sign in to access your tasks, documents, and links</p>
+                <h2 class="text-center">Welcome back</h2>
+                <p class="text-muted text-center">Sign in to access your tasks, documents, and links</p>
             </div>
 
             <!-- Security Alert -->
-            <div class="alert alert-info">
+            <div class="alert alert-info text-center">
                 <i class="fas fa-info-circle"></i>
                 <strong>Security Tip:</strong> When using public computers, enable auto-logout in settings.
             </div>
 
             <!-- Login Form -->
-            <form id="loginForm" method="POST" action="{{ route('login') }}">
+            <form class="d-flex flex-column" id="loginForm" method="POST" action="{{ route('login') }}">
                 @csrf
-                <div class="form-group">
+                <div class="form-group mb-0">
                     <label for="email" class="form-label">Email Address</label>
                     <input type="email" id="email" name="email" class="form-control" placeholder="you@example.com"
                         autocomplete="email" required>
@@ -42,8 +42,9 @@
                 <div class="form-group">
                     <div class="d-flex justify-between">
                         <label for="password" class="form-label">Password</label>
-                        {{-- <a href="{{ route('password.request') }}" style="font-size: var(--font-size-sm);">Forgot
-                            password?</a> --}}
+                        <a class="not-hover" href="{{ route('password.request') }}"
+                            style="font-size: var(--font-size-sm);">Forgot
+                            password?</a>
                     </div>
                     <div style="position: relative;">
                         <input type="password" id="password" name="password" class="form-control"
@@ -83,7 +84,7 @@
                     </div>
                 @endif
 
-                <button type="submit" class="btn btn-primary btn-full mt-2">
+                <button type="submit" class="btn btn-outline mt-2 form-btn">
                     <i class="fas fa-sign-in-alt"></i>
                     Sign In
                 </button>

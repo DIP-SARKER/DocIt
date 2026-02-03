@@ -399,7 +399,9 @@ img {
     );
     box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
 }
-
+.form-btn {
+    align-self: center;
+}
 .btn-sm {
     padding: 0.5rem 1rem;
     font-size: var(--font-size-sm);
