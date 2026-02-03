@@ -197,47 +197,131 @@
                     {{ $users->links() }}
                 </div>
             @endif
-            <div class="card mt-4 d-flex justify-between" style="border-color: var(--danger)">
-                <a class="btn btn-outline" href="{{ route('admin.tools.export') }}">
-                    <i class="fas fa-download"></i>
-                    Export All Data
-                </a>
+            <button class="btn btn-outline btn-full mt-4" id="toggleDangerZone"
+                style="color: var(--danger); border-color: var(--danger);" aria-expanded="false">
+                Open Danger Zone
+            </button>
+            <div id="dangerZone" class="card mt-4"
+                style="
+        border: 1px solid var(--danger);
+        padding: var(--space-lg);
+        display: none;
+        flex-direction: column;
+        gap: var(--space-lg);
+    ">
 
-                <form method="POST" action="{{ route('admin.tools.clearCache') }}">
-                    @csrf
-                    <button type="submit" class="btn btn-primary"
-                        onclick="return confirm('Clear application cache now?')">
-                        <i class="fas fa-broom"></i>
-                        Clear cache
-                    </button>
-                </form>
-
-                <form style="diaplaylex
-                " method="POST" action="{{ route('admin.tools.purge') }}"
-                    onsubmit="return confirm('This will permanently delete all data of DocIt. Continue?')">
-                    @csrf
-                    @method('DELETE')
-
-                    <div class="form-group">
-                        <input type="text" name="confirm" value="" required>
-                        <p class="text-muted" id="lgMailHint" style="font-size: var(--font-size-sm);">
-                            <i class="fas fa-info-circle"></i>
-                            Type "DELETE_ALL" to proceed.
+                {{-- Export --}}
+                <div class="d-flex justify-between align-center flex-wrap gap-2">
+                    <div>
+                        <strong>Export Data</strong>
+                        <p class="text-muted" style="font-size: var(--font-size-sm); margin: 0;">
+                            Download a full backup of application data.
                         </p>
                     </div>
 
+                    <a class="btn btn-outline" href="{{ route('admin.tools.export') }}">
+                        <i class="fas fa-download"></i>
+                        Export All Data
+                    </a>
+                </div>
 
-                    <button type="submit" class="btn btn-danger">
-                        <i class="far fa-trash-alt"></i>
-                        Delete all data
-                    </button>
-                </form>
+                <hr style="border-color: var(--border);">
+
+                {{-- Clear Cache --}}
+                <div class="d-flex justify-between align-center flex-wrap gap-2">
+                    <div>
+                        <strong>Clear Cache</strong>
+                        <p class="text-muted" style="font-size: var(--font-size-sm); margin: 0;">
+                            Clear application cache and config.
+                        </p>
+                    </div>
+
+                    <form method="POST" action="{{ route('admin.tools.clearCache') }}">
+                        @csrf
+                        <button type="submit" class="btn btn-primary"
+                            onclick="return confirm('Clear application cache now?')">
+                            <i class="fas fa-broom"></i>
+                            Clear Cache
+                        </button>
+                    </form>
+                </div>
+
+                <hr style="border-color: var(--danger);">
+
+                {{-- Danger Zone --}}
+                <div
+                    style="
+            background: rgba(239, 68, 68, 0.06);
+            border: 1px dashed var(--danger);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+        ">
+
+                    <strong style="color: var(--danger);">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Danger Zone
+                    </strong>
+
+                    <p class="text-muted" style="font-size: var(--font-size-sm); margin-top: var(--space-xs);">
+                        This action will permanently delete all data. This cannot be undone.
+                    </p>
+
+                    <form method="POST" action="{{ route('admin.tools.purge') }}"
+                        onsubmit="return confirm('This will permanently delete all data of DocIt. Continue?')"
+                        style="margin-top: var(--space-md);">
+                        @csrf
+                        @method('DELETE')
+
+                        <div class="form-group" style="max-width: 320px;">
+                            <input type="text" name="confirm" class="form-control" placeholder="Type DELETE_ALL"
+                                required>
+
+                            <p class="text-muted" id="purgeHint"
+                                style="font-size: var(--font-size-sm); margin-top: var(--space-xs);">
+                                <i class="fas fa-info-circle"></i>
+                                Type <strong>DELETE_ALL</strong> to enable deletion.
+                            </p>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger mt-2">
+                            <i class="far fa-trash-alt"></i>
+                            Delete All Data
+                        </button>
+                    </form>
+                </div>
             </div>
+
 
         </div>
     </main>
     <script>
-        // Optional: auto-submit search on Enter is already handled by form submit.
-        // You can add AJAX actions later (role change, block toggle, delete-all) using these data-user-id attributes.
+        (function() {
+            const toggleBtn = document.getElementById("toggleDangerZone");
+            const dangerZone = document.getElementById("dangerZone");
+
+            if (!toggleBtn || !dangerZone) return;
+
+            toggleBtn.addEventListener("click", function() {
+                const isOpen = dangerZone.style.display !== 'none';
+
+                if (isOpen) {
+                    // Close
+                    dangerZone.style.display = "none";
+                    toggleBtn.textContent = "Open Danger Zone";
+                    toggleBtn.setAttribute("aria-expanded", "false");
+                } else {
+                    // Open
+                    dangerZone.style.display = "flex";
+                    toggleBtn.textContent = "Close Danger Zone";
+                    toggleBtn.setAttribute("aria-expanded", "true");
+
+                    // Optional: scroll into view
+                    dangerZone.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start"
+                    });
+                }
+            });
+        })();
     </script>
 @endsection

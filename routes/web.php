@@ -9,17 +9,6 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ShortLinkController;
 use Illuminate\Support\Facades\Route;
 
-// Tests
-
-Route::get('/f/pass', function () {
-    return view('auth.verify-email');
-})->name('none');
-Route::get('/r/pass', function () {
-    return view('auth.reset-password');
-})->name('none1');
-Route::get('/c/p', function () {
-    return view('auth.confirm-password');
-})->name('none2');
 
 // Main
 
@@ -36,7 +25,7 @@ Route::get('/privacy-policy', function () {
 })->name('privacy-policy');
 
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/dashboard', [DashBoardController::class, 'index'])->name('dashboard');
     Route::get('/mods/dashboard', [DashBoardController::class, 'index'])->name('mods.dashboard');
@@ -60,30 +49,38 @@ Route::middleware('auth')->group(function () {
     Route::patch('/shortlinks/{shortLink}/expand', [ShortLinkController::class, 'expand'])->name('shortlinks.expand');
     Route::delete('/shortlinks/{shortLink}', [ShortLinkController::class, 'destroy'])->name('shortlinks.destroy');
 
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
-    Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile.update');
-    Route::get('/settings/export', [SettingsController::class, 'export'])->name('settings.export');
-    Route::post('/settings/logout-everywhere', [SettingsController::class, 'logoutEverywhere'])
-        ->name('settings.logout.everywhere');
-    Route::delete('/settings/account', [SettingsController::class, 'destroyAccount'])->name('settings.account.destroy');
 
 
     Route::get('/admin/dashboard', [AdminController::class, 'showAdmin'])->name('admin.dashboard');
-    Route::put('/admin/users/{user}', [AdminController::class, 'update'])
-        ->name('admin.users.update');
-    Route::delete('/admin/users/{user}/data', [AdminController::class, 'deleteUserData'])
-        ->name('admin.data.delete');
 
-    Route::get('/admin/tools/export', [AdminController::class, 'exportAllData'])
-        ->name('admin.tools.export');
-    Route::post('/admin/tools/clear-cache', [AdminController::class, 'clearCache'])
-        ->name('admin.tools.clearCache');
-    Route::delete('/admin/tools/purge', [AdminController::class, 'purgeAllData'])
-        ->name('admin.tools.purge');
+    Route::middleware('password.confirm')->group(function () {
+
+        // Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        // Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        // Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+        Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile.update');
+        Route::get('/settings/export', [SettingsController::class, 'export'])->name('settings.export');
+        Route::post('/settings/logout-everywhere', [SettingsController::class, 'logoutEverywhere'])
+            ->name('settings.logout.everywhere');
+        Route::delete('/settings/account', [SettingsController::class, 'destroyAccount'])->name('settings.account.destroy');
+
+
+        Route::put('/admin/users/{user}', [AdminController::class, 'update'])
+            ->name('admin.users.update');
+        Route::delete('/admin/users/{user}/data', [AdminController::class, 'deleteUserData'])
+            ->name('admin.data.delete');
+        Route::get('/admin/tools/export', [AdminController::class, 'exportAllData'])
+            ->name('admin.tools.export');
+        Route::post('/admin/tools/clear-cache', [AdminController::class, 'clearCache'])
+            ->name('admin.tools.clearCache');
+        Route::delete('/admin/tools/purge', [AdminController::class, 'purgeAllData'])
+            ->name('admin.tools.purge');
+    });
+
+
 });
 
 Route::get('/link-expired', function () {

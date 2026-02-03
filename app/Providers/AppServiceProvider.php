@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Auth;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Auth::resolved(function ($auth) {
+            $guard = $auth->guard('web');
+
+            if ($guard instanceof SessionGuard) {
+                // 30 days in minutes
+                $guard->setRememberDuration(43200);
+            }
+        });
     }
 }

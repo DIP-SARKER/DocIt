@@ -1,62 +1,3 @@
-{{-- <x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
-    </div>
-
-    @if (session('status') == 'verification-link-sent')
-        <div class="mb-4 font-medium text-sm text-green-600">
-            {{ __('A new verification link has been sent to the email address you provided during registration.') }}
-        </div>
-    @endif
-
-    <div class="mt-4 flex items-center justify-between">
-        <form method="POST" action="{{ route('verification.send') }}">
-            @csrf
-
-            <div>
-                <x-primary-button>
-                    {{ __('Resend Verification Email') }}
-                </x-primary-button>
-            </div>
-        </form>
-
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-
-            <button type="submit" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                {{ __('Log Out') }}
-            </button>
-        </form>
-    </div>
-</x-guest-layout> --}}
-
-{{-- <x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
-    </div>
-
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
-
-    <form method="POST" action="{{ route('password.email') }}">
-        @csrf
-
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout> --}}
-
-
 @extends('layouts.guest')
 
 @section('title', 'Verify Email - DocIt')
@@ -68,40 +9,54 @@
             <i class="fas fa-arrow-left"></i>
             Back to home
         </a>
-        <!-- Login Card -->
+
         <div class="card">
-            <div class="mb-3  d-flex flex-column align-center">
+            <div class="mb-3 d-flex flex-column align-center">
                 <a href="{{ route('home') }}" class="navbar-brand not-hover">
                     <i class="fas fa-file-alt"></i>
                     DocIt
                 </a>
+
                 <h2 class="text-center">Verify your email address</h2>
-                <p class="text-muted text-center">We'll send a verification link to:
-                    <span>user@email.com</span>
+
+                <p class="text-muted text-center">
+                    We sent a verification link to:
+                    <strong>{{ auth()->user()?->email }}</strong>
                 </p>
-                <p class="text-muted text-center">We’ve sent a verification link to:
-                    user@email.com</br>Please check your inbox and click the verification link to activate your account.
-                    If
-                    you don’t see it, check your spam or promotions folder.</p>
+
+                <p class="text-muted text-center" style="font-size: var(--font-size-sm);">
+                    Please check your inbox (and spam/promotions). Click the link to activate your account.
+                </p>
             </div>
 
-            <!-- Login Form -->
-            <form class="d-flex flex-column" id="verifyEmailForm" method="POST" action="{{ route('verification.send') }}">
-                @csrf
-                <div class="form-group mb-0">
-                    <label for="email" class="form-label">Email Address</label>
-                    <input type="email" id="email" name="email" class="form-control" placeholder="you@example.com"
-                        autocomplete="email" required>
-                    <p class="text-muted" id="lgMailHint" style="font-size: var(--font-size-sm);">
-                        <i class="fas fa-info-circle"></i>
-                        Enter your valid email address.
-                    </p>
+            {{-- ✅ Breeze session status --}}
+            @if (session('status') === 'verification-link-sent')
+                <div class="alert alert-success d-flex align-center gap-2 mb-3" id="ve-statusBox" role="status">
+                    <i class="fas fa-check-circle"></i>
+                    <div>A new verification link has been sent to your email address.</div>
                 </div>
-                <!-- Error Message Placeholder -->
+            @endif
+
+            {{-- ✅ Resend form --}}
+            <form class="d-flex flex-column" id="ve-resendForm" method="POST" action="{{ route('verification.send') }}">
+                @csrf
+
+                <button type="submit" class="btn btn-outline mt-2 form-btn" id="ve-resendBtn">
+                    <i class="fas fa-paper-plane"></i>
+                    <span id="ve-resendText">Resend verification email</span>
+                </button>
+
+                <p class="text-muted mt-2 text-center" id="ve-rateInfo"
+                    style="font-size: var(--font-size-sm); display:none;">
+                    <i class="fas fa-shield-alt"></i>
+                    <span id="ve-rateText"></span>
+                </p>
+
+                {{-- ✅ Error summary (rare here, but keep consistent) --}}
                 @if ($errors->any())
-                    <div id="loginError" class="alert alert-danger align-center d-flex gap-2 mt-4">
+                    <div id="ve-errorSummary" class="alert alert-danger align-center d-flex gap-2 mt-4" role="alert">
                         <i class="fas fa-exclamation-circle"></i>
-                        <div id="errorText">
+                        <div>
                             <ul class="mb-0" style="padding-left: var(--space-sm)">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
@@ -110,11 +65,152 @@
                         </div>
                     </div>
                 @endif
-                <button type="submit" class="btn btn-outline mt-2 form-btn">
-                    <i class="fas fa-paper-plane"></i>
-                    Send Email
+            </form>
+
+            {{-- ✅ Logout form --}}
+            <form method="POST" action="{{ route('logout') }}" class="d-flex mt-3 justify-center">
+                @csrf
+                <button type="submit" class="btn btn-secondary w-100" id="ve-logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Log out
                 </button>
             </form>
         </div>
     </div>
+
+    <script>
+        (function() {
+            // ✅ Set this to your server throttle window.
+            // Breeze often throttles verification resends; if you want exact match, set this to route middleware value.
+            const THROTTLE_SECONDS = 60; // conservative UX (prevents spam-clicks)
+            const MAX_ATTEMPTS = 6; // optional UX limit per window (matches common throttle patterns)
+            const WINDOW_MINUTES = 10; // optional window for attempt counting
+
+            const STORAGE_KEY = "docit_ve_rate_v1";
+
+            const form = document.getElementById("ve-resendForm");
+            const resendBtn = document.getElementById("ve-resendBtn");
+            const resendText = document.getElementById("ve-resendText");
+            const rateInfo = document.getElementById("ve-rateInfo");
+            const rateText = document.getElementById("ve-rateText");
+
+            if (!form || !resendBtn || !resendText || !rateInfo || !rateText) return;
+
+            function nowMs() {
+                return Date.now();
+            }
+
+            function loadState() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    const parsed = raw ? JSON.parse(raw) : null;
+                    if (!parsed || typeof parsed !== "object") {
+                        return {
+                            attempts: [],
+                            cooldownUntil: 0
+                        };
+                    }
+                    return {
+                        attempts: Array.isArray(parsed.attempts) ? parsed.attempts.map(Number) : [],
+                        cooldownUntil: Number(parsed.cooldownUntil || 0),
+                    };
+                } catch {
+                    return {
+                        attempts: [],
+                        cooldownUntil: 0
+                    };
+                }
+            }
+
+            function saveState(state) {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            }
+
+            function pruneAttempts(attempts) {
+                const windowMs = WINDOW_MINUTES * 60 * 1000;
+                const cutoff = nowMs() - windowMs;
+                return attempts.filter(t => t >= cutoff);
+            }
+
+            function setDisabled(disabled) {
+                resendBtn.disabled = disabled;
+                resendBtn.style.opacity = disabled ? "0.7" : "1";
+                resendBtn.style.cursor = disabled ? "not-allowed" : "pointer";
+            }
+
+            function showRateInfo(message) {
+                rateInfo.style.display = "block";
+                rateText.textContent = message;
+            }
+
+            function hideRateInfo() {
+                rateInfo.style.display = "none";
+                rateText.textContent = "";
+            }
+
+            let timer = null;
+
+            function render() {
+                const state = loadState();
+                state.attempts = pruneAttempts(state.attempts);
+                saveState(state);
+
+                // Optional attempt window lock
+                if (state.attempts.length >= MAX_ATTEMPTS) {
+                    setDisabled(true);
+                    resendText.textContent = "Try again later";
+                    showRateInfo("Too many resend attempts. Please wait and try again later.");
+                    return;
+                }
+
+                // Cooldown lock
+                const remainingMs = state.cooldownUntil - nowMs();
+                if (remainingMs > 0) {
+                    const s = Math.ceil(remainingMs / 1000);
+                    setDisabled(true);
+                    resendText.textContent = `Please wait (${s}s)`;
+                    showRateInfo(`To avoid spam, you can resend again in ${s} seconds.`);
+                    return;
+                }
+
+                setDisabled(false);
+                resendText.textContent = "Resend verification email";
+                hideRateInfo();
+            }
+
+            function startTicker() {
+                if (timer) clearInterval(timer);
+                timer = setInterval(render, 500);
+            }
+
+            render();
+            startTicker();
+
+            form.addEventListener("submit", function(event) {
+                const state = loadState();
+                state.attempts = pruneAttempts(state.attempts);
+
+                // Guard if blocked
+                if (state.attempts.length >= MAX_ATTEMPTS) {
+                    event.preventDefault();
+                    render();
+                    return;
+                }
+                if (state.cooldownUntil > nowMs()) {
+                    event.preventDefault();
+                    render();
+                    return;
+                }
+
+                // Apply cooldown immediately (UX)
+                state.attempts.push(nowMs());
+                state.cooldownUntil = nowMs() + (THROTTLE_SECONDS * 1000);
+                saveState(state);
+
+                setDisabled(true);
+                resendText.textContent = "Sending...";
+                showRateInfo(`Request sent. You can resend again in ${THROTTLE_SECONDS} seconds.`);
+            });
+        })();
+    </script>
 @endsection

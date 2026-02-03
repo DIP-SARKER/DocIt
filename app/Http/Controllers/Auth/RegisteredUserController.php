@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Http;
 
 class RegisteredUserController extends Controller
 {
@@ -29,6 +31,27 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // ✅ Turnstile validation (before authenticate)
+        $request->validate([
+            'cf-turnstile-response' => ['required'],
+        ], [
+            'cf-turnstile-response.required' => 'Please verify you are human.',
+        ]);
+
+        $verify = Http::asForm()->post(
+            'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+            [
+                'secret' => config('services.turnstile.secret'),
+                'response' => $request->input('cf-turnstile-response'),
+                // 'remoteip' => $request->ip(), // optional
+            ]
+        );
+
+        if (!$verify->ok() || data_get($verify->json(), 'success') !== true) {
+            throw ValidationException::withMessages([
+                'cf-turnstile-response' => 'Turnstile verification failed. Please try again.',
+            ]);
+        }
         $request->validate([
             'name' => ['required', 'string', 'max:255', 'min:6', 'alpha_dash', 'unique:' . User::class],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],

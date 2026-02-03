@@ -103,6 +103,11 @@
                     </div>
                 @endif
 
+                <div class="d-flex justify-center mt-2">
+                    <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.sitekey') }}">
+                    </div>
+                </div>
+
                 <!-- ✅ Remove disabled unless JS enables it -->
                 <button type="submit" id="registerSubmitBtn" class="btn btn-outline mt-2 form-btn" disabled>
                     <i class="fas fa-user-plus"></i>

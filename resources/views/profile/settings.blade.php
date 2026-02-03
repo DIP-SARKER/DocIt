@@ -10,24 +10,6 @@
                 <p class="text-muted">Manage your account and security preferences</p>
             </div>
 
-            {{-- Flash messages --}}
-            @if (session('success'))
-                <div class="card mb-3" style="border-left: 4px solid var(--accent); padding: 12px;">
-                    <strong>{{ session('success') }}</strong>
-                </div>
-            @endif
-
-            @if ($errors->any())
-                <div class="card mb-3" style="border-left: 4px solid var(--danger); padding: 12px;">
-                    <strong>Fix the following:</strong>
-                    <ul style="margin: 8px 0 0 18px;">
-                        @foreach ($errors->all() as $error)
-                            <li class="text-muted">{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
             {{-- Profile Section --}}
             <div class="card mb-4">
                 <div class="card-header">
@@ -78,14 +60,14 @@
                                 Save Changes
                             </button>
                             <div class="d-flex gap-2">
-                                <button class="btn btn-outline" id="changePasswordBtn">
+                                {{-- <a href="{{ route('password.edit') }}" class="btn btn-outline" id="changePasswordBtn">
                                     <i class="fas fa-key"></i>
                                     Change Password
-                                </button>
-                                <button class="btn btn-outline" id="sessionManagerBtn">
+                                </a> --}}
+                                {{-- <button class="btn btn-outline" id="sessionManagerBtn">
                                     <i class="fas fa-desktop"></i>
                                     Manage Sessions
-                                </button>
+                                </button> --}}
                             </div>
                         </div>
                     </form>

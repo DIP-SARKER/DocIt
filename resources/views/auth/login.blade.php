@@ -48,7 +48,7 @@
                     </div>
                     <div style="position: relative;">
                         <input type="password" id="password" name="password" class="form-control"
-                            placeholder="Enter your password" required>
+                            placeholder="Enter your password" autocomplete="current-password" required>
                         <button type="button" id="togglePassword" class="i-btn"
                             style="position: absolute; right: 0; top: 0; height: 100%; color: var(--text-muted); border: none; background: transparent; margin-right: 15px; cursor: pointer;">
                             <i class="far fa-eye"></i>
@@ -83,7 +83,10 @@
                         </div>
                     </div>
                 @endif
-
+                <div class="d-flex justify-center">
+                    <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.sitekey') }}">
+                    </div>
+                </div>
                 <button type="submit" class="btn btn-outline mt-2 form-btn">
                     <i class="fas fa-sign-in-alt"></i>
                     Sign In
