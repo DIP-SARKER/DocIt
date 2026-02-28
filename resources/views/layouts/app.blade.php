@@ -10,6 +10,7 @@
     <title>@yield('title', 'DocIt')</title>
     <link rel="stylesheet" href="{{ asset('assets/css/styles.css') }}" />
     @stack('styles')
+    @livewireStyles
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,6 +36,7 @@
     <script src="{{ asset('assets/js/script.js') }}"></script>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     @stack('scripts')
+    @livewireScripts
 </body>
 
 </html>

@@ -3,7 +3,7 @@
 @section('title', 'Create Account - DocIt')
 
 @section('content')
-    <div class="container" style="max-width: 600px;">
+    <div class="container mb-4 mt-2" style="max-width: 600px;">
         <!-- Back to Home -->
         <a href="{{ route('home') }}" class="d-flex align-center gap-1 mb-3" style="color: var(--text-muted);">
             <i class="fas fa-arrow-left"></i>
